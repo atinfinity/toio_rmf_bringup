@@ -3,6 +3,9 @@
 Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーション・Nav2を
 1コマンドで一括起動するパッケージ。
 
+**環境構築**(新規PC): [docs/SETUP.md](docs/SETUP.md) 参照。
+`scripts/setup_environment.sh` でapt導入からビルドまで自動化できる。
+
 ## 起動(シミュレーション)
 
 ```bash
