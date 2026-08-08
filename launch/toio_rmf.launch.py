@@ -29,6 +29,7 @@ from launch.actions import IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch.substitutions import PythonExpression
 from launch_ros.actions import Node
 from launch_ros.actions import SetParameter
 from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
@@ -50,6 +51,7 @@ def generate_launch_description():
     server_uri = LaunchConfiguration('server_uri')
     bidding_time_window = LaunchConfiguration('bidding_time_window')
     robots = LaunchConfiguration('robots')
+    peer_footprint_size = LaunchConfiguration('peer_footprint_size')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
@@ -99,6 +101,19 @@ def generate_launch_description():
                     'itself spawns the fixed toio1/toio2 pair; for other '
                     'robot sets run the simulation or the real-robot '
                     'bringup separately with run_sim:=false)')
+
+    declare_peer_footprint_size_cmd = DeclareLaunchArgument(
+        'peer_footprint_size',
+        default_value='auto',
+        description='Square footprint edge (m) painted for peer robots by '
+                    'peer_robot_costmap_publisher, or "auto" to pick per '
+                    'mat. Collision testing showed the cube size (0.032) '
+                    'lets close-range head-on encounters brush past with '
+                    'body contact on A3; 0.10 keeps A3 cubes fully '
+                    'separated (closest 49.2 mm). On the smaller A4 mat '
+                    '0.10 blocks the corridors entirely (planner '
+                    'deadlock), so auto uses 0.06 there, which is safe in '
+                    'combination with its one-way nav graph')
 
     building_yaml = [
         maps_dir, '/maps/toio_', mat, '/toio_', mat, '.building.yaml']
@@ -211,6 +226,10 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
             'use_rviz': use_nav_rviz,
             'robots': robots,
+            'peer_footprint_size': PythonExpression(
+                ["'", peer_footprint_size, "' if '", peer_footprint_size,
+                 "' != 'auto' else ('0.10' if '", mat,
+                 "' == 'a3' else '0.06')"]),
         }.items())
 
     ld = LaunchDescription()
@@ -223,6 +242,7 @@ def generate_launch_description():
     ld.add_action(declare_server_uri_cmd)
     ld.add_action(declare_bidding_time_window_cmd)
     ld.add_action(declare_robots_cmd)
+    ld.add_action(declare_peer_footprint_size_cmd)
     ld.add_action(rmf_core)
     ld.add_action(fleet_adapter)
     ld.add_action(simulation)
