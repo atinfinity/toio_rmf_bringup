@@ -60,25 +60,55 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
 5. **cancel_task** は `--use_sim_time` 引数非対応(`-id` のみ)
 6. **toio.pyのバージョン**: pipの `toio.py` 最新は1.1.0(資料に1.10.0とある場合は誤記)
 
-## 実機検証の手順(フェーズ5残り)
+## 実機検証の手順(フェーズ5残り・A4マット)
+
+### 前提(A4固有)
+
+- **toio_rmf_mapsのA4一方通行グラフ(PR #1)がマージ済み**であること
+  (未マージなら `fix/a4-one-way-loop` ブランチをチェックアウトしてビルド)
+- A4のnavグラフは**時計回りの一方通行ループ**:
+  `charger_1 → patrol_A → charger_2 → patrol_B → charger_1`
+  (waypointはこの4つのみ。A3のpatrol_C/Dは存在しない)
+- peer costmapのフットプリントは自動で0.06(`peer_footprint_size:=auto`)
+- **既知の制約**: 2台が共有頂点(charger付近)で同時に入替るタイミングでは
+  角が掠る接触(シミュレーション実測35mm前後)が起き得る。A4での2台同時運用は
+  物理限界に近いため、検証は「1台ずつのタスク」を基本にし、2台同時テストは
+  接触リスクを認識のうえ実施すること(確実な非接触が必要ならA3を使用)
+
+### キューブの初期配置
+
+マット左右中央付近のチャージャーwaypointに置く(だいたいで可、
+`max_merge_lane_distance: 0.15` の範囲で自動マージされる):
+
+- toio1 → charger_1: マット左端から約5cm・上下中央
+- toio2 → charger_2: マット右端から約5cm・上下中央
+
+### 起動(2端末)
 
 1. キューブのcube_id確認: 電源を入れ `ros2 run toio_ros2 toio_ros2_node` のログ、
    またはBLEスキャナでローカル名(`toio Core Cube-XXX` のXXX部分)を確認
-2. 起動(2端末):
+2. 起動:
    ```bash
    # 端末1: RMFコア+アダプタ(シミュレーションなし)
-   ros2 launch toio_rmf_bringup toio_rmf.launch.py run_sim:=false use_sim_time:=false mat:=a3
-   # 端末2: 実機ブリッジ(venv内で)
+   ros2 launch toio_rmf_bringup toio_rmf.launch.py run_sim:=false use_sim_time:=false mat:=a4
+   # 端末2: 実機ブリッジ(venv内で)。params_fileはデフォルトがA4なので指定不要
    source ~/toio_venv/bin/activate
-   ros2 launch toio_ros2 toio_multi_bringup.launch.py cube_ids:=<ID1>,<ID2> \
-     params_file:=<toio_ros2>/params/toio_a3_play_mat_params.yaml
+   ros2 launch toio_ros2 toio_multi_bringup.launch.py cube_ids:=<ID1>,<ID2>
    ```
    ※RMF運用時は `enable_goal_pose_motion:=false` をtoio_ros2ノードに設定すること
-3. 検証項目(シミュレーションで検証済みのシナリオを再実施):
-   - [ ] patrolタスク完走(1台・3周)
-   - [ ] 2台同時の交差タスク(すれ違い)完走・衝突なし
-   - [ ] バッテリー離散値(10/20/50/100%)の実測確認(`/toioN/toio/battery_level` を観察)
-   - [ ] 低バッテリー時のChargeBattery発行・チャージャー帰還
-   - [ ] タスクキャンセル→再投入
-   - [ ] BLE切断(キューブを持ち上げ等)→ 位置報告停止 → 再接続後の復帰
-   - [ ] マット境界付近での挙動(Position ID読取不能領域に入らないこと)
+
+### 検証項目
+
+タスク例はA4のwaypoint名(`patrol_A` / `patrol_B` / `charger_1` / `charger_2`)を使う。
+
+- [ ] patrolタスク完走(1台・3周):
+      `ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_B -n 3`
+      ※一方通行のためpatrol_B→patrol_Aはループを回って戻る(挙動として正常)
+- [ ] 2台のフリート登録と位置報告(RViz表示がマット上の実位置と一致)
+- [ ] 1台ずつの`go_to_place`(toio1→charger_2、完了後にtoio2→charger_1 など順次)
+- [ ] (任意・接触リスク認識のうえ)2台同時の交差タスク。charger付近の掠りを観察
+- [ ] バッテリー離散値(10/20/50/100%)の実測確認(`/toioN/toio/battery_level` を観察)
+- [ ] 低バッテリー時のChargeBattery発行・チャージャー帰還
+- [ ] タスクキャンセル→再投入(`cancel_task -id <task_id>`)
+- [ ] BLE切断(キューブを持ち上げ等)→ 位置報告停止 → 再接続後の復帰
+- [ ] マット境界付近での挙動(Position ID読取不能領域に入らないこと)

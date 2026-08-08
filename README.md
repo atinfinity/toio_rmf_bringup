@@ -36,8 +36,15 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 use_sim_time:=true
 ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 --use_sim_time
 ```
 
-A3マットのnavグラフ頂点: `charger_1` / `patrol_A` / `patrol_B` /
-`patrol_C` / `patrol_D` / `charger_2`(toio_rmf_maps参照)
+navグラフ頂点(toio_rmf_maps参照):
+
+- A3: `charger_1` / `patrol_A` / `patrol_B` / `patrol_C` / `patrol_D` / `charger_2`(双方向格子)
+- A4: `charger_1` / `patrol_A` / `charger_2` / `patrol_B`(**時計回りの一方通行ループ**)
+
+**A4での2台同時運用の注意**: マットが狭く(0.30×0.20m)、charger頂点付近で
+2台が同時に入替るタイミングでは角が接触し得る(シミュレーション実測)。
+2台での確実な非接触運用にはA3を推奨。peer costmapのフットプリントは
+`peer_footprint_size:=auto` でA3=0.10 / A4=0.06が自動設定される。
 
 ## 構成
 
