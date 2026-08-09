@@ -124,6 +124,9 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 -F toio -R to
 各タスクの中身(走行経路・投入の流れ・go_to_place / ChargeBattery / キャンセル)は
 [docs/TASKS.md](docs/TASKS.md) に図で解説している。
 
+ブラウザからタスクを投入・監視したい場合は、rmf-web(api-server + ダッシュボード)を
+コンテナで起動できる(任意)。手順は [docs/DASHBOARD.md](docs/DASHBOARD.md) 参照。
+
 navグラフ頂点(toio_rmf_maps参照):
 
 - A3: `charger_1` / `patrol_A` / `patrol_B` / `patrol_C` / `patrol_D` / `charger_2`(双方向格子)

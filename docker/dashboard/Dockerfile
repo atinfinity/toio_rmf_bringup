@@ -1,0 +1,76 @@
+# toio フリート向け rmf-web ダッシュボードのイメージ。
+#
+# upstream の .github/demo-dashboard/Dockerfile を土台に、examples/demo の
+# main.tsx を toio 向け設定(docker/dashboard/main.tsx)へ差し替えてビルドする。
+#
+# ベースの minimal-rmf は linux/amd64 のみ公開されている。arm64 のマシンで
+# ビルドする場合は --platform linux/amd64 を付けること(エミュレーションに
+# なるため非常に遅い)。
+
+ARG BASE_IMAGE=ghcr.io/open-rmf/rmf-web/minimal-rmf:jazzy-nightly
+
+FROM $BASE_IMAGE AS build
+
+# ダッシュボードのソースを取得する rmf-web のリビジョン。ROS 2 Jazzy 向けは jazzy ブランチ
+ARG RMF_WEB_REF=jazzy
+
+# toio 向けのビルド時設定(Vite が VITE_ 接頭辞の環境変数を埋め込む)。
+# 未指定なら main.tsx 側の既定値が使われる
+ARG VITE_TOIO_DEFAULT_ZOOM=
+ARG VITE_TOIO_DEFAULT_ROBOT_ZOOM=
+ARG VITE_TOIO_API_SERVER_URL=
+ARG VITE_TOIO_TRAJECTORY_SERVER_URL=
+ENV VITE_TOIO_DEFAULT_ZOOM=$VITE_TOIO_DEFAULT_ZOOM \
+    VITE_TOIO_DEFAULT_ROBOT_ZOOM=$VITE_TOIO_DEFAULT_ROBOT_ZOOM \
+    VITE_TOIO_API_SERVER_URL=$VITE_TOIO_API_SERVER_URL \
+    VITE_TOIO_TRAJECTORY_SERVER_URL=$VITE_TOIO_TRAJECTORY_SERVER_URL
+
+# api-server は rmf-dashboard-framework の dev 依存なので python も必要
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+       ca-certificates curl python3 python3-venv \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://get.pnpm.io/install.sh | bash -
+# 非対話シェルでは .bashrc が読まれないため PATH を明示する
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH="$PNPM_HOME/bin:$PATH"
+RUN pnpm runtime set node lts -g
+
+RUN mkdir -p /ws \
+  && curl -fL "https://github.com/open-rmf/rmf-web/archive/$RMF_WEB_REF.tar.gz" \
+       -o /tmp/rmf_web.tar.gz \
+  && tar zxf /tmp/rmf_web.tar.gz -C /ws --strip-components=1 \
+  && rm /tmp/rmf_web.tar.gz
+
+# 非対話環境ではビルドスクリプトが無視されて install が失敗することがあるため、
+# upstream と同じく approve-builds してリトライする
+RUN cd /ws \
+  && (pnpm install --filter rmf-dashboard-framework... \
+      || (pnpm approve-builds --all && pnpm install --filter rmf-dashboard-framework...))
+
+# デモ用の設定を toio 向けに差し替えてからビルドする
+COPY main.tsx /ws/packages/rmf-dashboard-framework/examples/demo/main.tsx
+RUN cd /ws/packages/rmf-dashboard-framework \
+  && pnpm build:example examples/demo
+
+### 配信用の最小イメージ
+FROM docker.io/library/ubuntu:24.04
+
+COPY --from=build /ws/packages/rmf-dashboard-framework/examples/demo/dist /opt/dashboard
+
+# libatomic1 は clean な ubuntu 上で pnpm のバイナリが必要とする
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl libatomic1 \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://get.pnpm.io/install.sh | bash -
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH="$PNPM_HOME/bin:$PATH"
+RUN pnpm runtime set node lts -g
+RUN pnpm add --global serve
+
+# serve は PORT 環境変数を見る
+ENV PORT=3000
+EXPOSE 3000
+ENTRYPOINT ["serve", "-sn", "/opt/dashboard"]
