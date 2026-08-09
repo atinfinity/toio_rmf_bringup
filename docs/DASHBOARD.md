@@ -166,6 +166,32 @@ macOS で監視だけしたい場合の妥協案であって、本来の構成�
 `USE_SIM_TIME=false` にする。ここがずれると api-server が `/clock` を待ち続けたり、
 開始時刻が過去や未来にずれたりする。
 
+**ダッシュボードが白画面になる**
+
+`RMF_WEB_REF` の既定 `jazzy` でビルドすると、画面が真っ白になり
+コンソールに**メッセージのない `Error`** だけが出る。react-router の invariant で、
+`<Routes>` が `<Router>` のコンテキスト外だと判定されている
+(本番ビルドはメッセージが削られるため内容が出ない)。
+
+**upstream 側の問題**で、本リポジトリの `main.tsx` は関係ない。根拠:
+
+- upstream 公式イメージ `ghcr.io/open-rmf/rmf-web/demo-dashboard:jazzy-nightly`
+  でも**同じ難読化位置**(`Lo` at 240:66679 / `j8` at 240:80093)で同じエラーが出る
+- 一方 `demo-dashboard:latest` は正常に描画し `/login` へ遷移する
+- 本リポジトリの `main.tsx` と upstream の `examples/demo/main.tsx` の差分は
+  zoom 値・URL・タスク種別・アプリ一覧だけで、レンダー構造は同一
+
+`Update deps (#1083)` (2026-05-08) の直前のリビジョンに固定すると解消する:
+
+```bash
+docker build --platform linux/amd64 --build-arg RMF_WEB_REF=c91f0d42 \
+  -t toio-rmf-dashboard:latest ./dashboard
+```
+
+macOS + 実機 toio で確認 (2026-08-10)。`jazzy` は `index-DJmLw7mG.js` で白画面、
+`c91f0d42` は `index-CyV80R56.js` で正常描画し、Robots タブに実機のバッテリー
+30% / CHARGING が表示された。upstream が修正されたら既定に戻してよい。
+
 **マップが点にしか見えない、または見切れる**
 
 `DASHBOARD_ZOOM` を調整して再ビルドする。ズームは `2^z` ピクセル毎メートル相当で、
@@ -180,6 +206,16 @@ docker build --platform linux/amd64 -t toio-rmf-dashboard:latest ./dashboard
 ```
 
 非常に時間がかかるので、実運用の Ubuntu(amd64)機でビルドすることを勧める。
+
+Apple Silicon の Docker Desktop では、**Rosetta を有効にしないとビルドが落ちる**。
+既定は qemu で、`pnpm install` 中に `@swc/core` の postinstall が
+`qemu: uncaught target signal 11 (Segmentation fault)` (exit code 139) になる。
+
+Settings → General → 「Use Rosetta for x86_64/amd64 emulation」を有効にして
+Docker Desktop を再起動すると通るようになり、速度も大きく改善する。
+
+なお `docker build ... | tail` のようにパイプすると終了コードが `tail` のものに
+なり、この失敗を成功と読み違えるので注意。
 
 **patrol 以外のタスクを投入したい**
 
