@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 630" width="760" height="630" role="img" aria-labelledby="t d">
+  <title id="t">A4マットのnavグラフ(一方通行ループ)</title>
+  <desc id="d">0.30 x 0.20 m のA4マット上に配置された4頂点(charger_1, patrol_A, charger_2, patrol_B)と、charger_1 から patrol_A、charger_2、patrol_B を経て charger_1 に戻る時計回りの一方通行レーン。</desc>
+  <style>
+    .bg   { fill: #ffffff; }
+    .mat  { fill: #eef2f7; stroke: #b6c2d1; stroke-width: 2; }
+    .lane { stroke: #8c9bab; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .wp   { fill: #ffffff; stroke: #2f6fdb; stroke-width: 4; }
+    .chg  { fill: #fff4d6; stroke: #d9971a; stroke-width: 4; }
+    .lbl  { fill: #1f2328; font-size: 20px; font-weight: 600; }
+    .mut  { fill: #57606a; font-size: 17px; }
+    .tiny { fill: #57606a; font-size: 15px; }
+    .warn { fill: #9a5b00; font-size: 16px; }
+    .bolt { fill: #d9971a; font-size: 18px; font-weight: 700; }
+    .head { fill: #8c9bab; }
+    .bar  { stroke: #57606a; stroke-width: 2.5; }
+    text  { font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif; }
+    @media (prefers-color-scheme: dark) {
+      .bg   { fill: #0d1117; }
+      .mat  { fill: #161b22; stroke: #30363d; }
+      .lane { stroke: #6e7681; }
+      .wp   { fill: #0d1117; stroke: #58a6ff; }
+      .chg  { fill: #3d2f0e; stroke: #d29922; }
+      .lbl  { fill: #e6edf3; }
+      .mut, .tiny { fill: #8b949e; }
+      .warn { fill: #d29922; }
+      .bolt { fill: #d29922; }
+      .head { fill: #6e7681; }
+      .bar  { stroke: #8b949e; }
+    }
+  </style>
+
+  <rect class="bg" width="760" height="630"/>
+
+  <text class="lbl" x="110" y="40">A4マット nav グラフ(時計回りの一方通行ループ)</text>
+  <text class="mut" x="110" y="66">0.30 × 0.20 m / patrol_C・patrol_D は存在しない / 縮尺 0.005 m per px</text>
+
+  <!-- mat: building.yaml pixel (0,0)-(60,40) at 9 svg px per map px, offset (110,80) -->
+  <rect class="mat" x="110" y="80" width="540" height="360" rx="8"/>
+
+  <!-- one-way lanes: charger_1 -> patrol_A -> charger_2 -> patrol_B -> charger_1 -->
+  <g class="lane">
+    <line x1="222" y1="251" x2="358" y2="197"/>
+    <line x1="402" y1="197" x2="538" y2="251"/>
+    <line x1="538" y1="269" x2="402" y2="323"/>
+    <line x1="358" y1="323" x2="222" y2="269"/>
+  </g>
+  <!-- arrow heads at the lane ends, rotated along each direction (+-21.8 deg) -->
+  <g class="head">
+    <polygon points="0,-8 20,0 0,8" transform="translate(358,197) rotate(-21.8)"/>
+    <polygon points="0,-8 20,0 0,8" transform="translate(538,251) rotate(21.8)"/>
+    <polygon points="0,-8 20,0 0,8" transform="translate(402,323) rotate(158.2)"/>
+    <polygon points="0,-8 20,0 0,8" transform="translate(222,269) rotate(-158.2)"/>
+  </g>
+  <!-- mid-lane arrow heads to make the flow direction unmistakable -->
+  <g class="head">
+    <polygon points="0,-7 17,0 0,7" transform="translate(290,224) rotate(-21.8)"/>
+    <polygon points="0,-7 17,0 0,7" transform="translate(470,224) rotate(21.8)"/>
+    <polygon points="0,-7 17,0 0,7" transform="translate(470,296) rotate(158.2)"/>
+    <polygon points="0,-7 17,0 0,7" transform="translate(290,296) rotate(-158.2)"/>
+  </g>
+
+  <!-- chargers -->
+  <rect class="chg" x="185" y="235" width="30" height="30" rx="5"/>
+  <text class="bolt" x="200" y="257" text-anchor="middle">⚡</text>
+  <text class="lbl" x="172" y="247" text-anchor="end">charger_1</text>
+  <text class="tiny" x="172" y="268" text-anchor="end">toio1 の充電位置</text>
+
+  <rect class="chg" x="545" y="235" width="30" height="30" rx="5"/>
+  <text class="bolt" x="560" y="257" text-anchor="middle">⚡</text>
+  <text class="lbl" x="588" y="247">charger_2</text>
+  <text class="tiny" x="588" y="268">toio2 の充電位置</text>
+
+  <!-- patrol waypoints -->
+  <circle class="wp" cx="380" cy="188" r="15"/>
+  <text class="lbl" x="380" y="160" text-anchor="middle">patrol_A</text>
+
+  <circle class="wp" cx="380" cy="332" r="15"/>
+  <text class="lbl" x="380" y="367" text-anchor="middle">patrol_B</text>
+
+  <!-- notes -->
+  <text class="mut" x="110" y="482">通行方向:charger_1 → patrol_A → charger_2 → patrol_B → charger_1</text>
+  <text class="warn" x="110" y="508">双方向レーンでは最接近 19.9 mm &lt; キューブ幅 32 mm となるため、</text>
+  <text class="warn" x="110" y="532">対向流を通行方向で分離している(逆走レーンなし)</text>
+  <text class="warn" x="110" y="556">patrol_B → patrol_A はループを一周して到達する</text>
+
+  <!-- scale bar: 0.1 m = 20 map px = 180 svg px -->
+  <g class="bar">
+    <line x1="470" y1="608" x2="650" y2="608"/>
+    <line x1="470" y1="601" x2="470" y2="615"/>
+    <line x1="650" y1="601" x2="650" y2="615"/>
+  </g>
+  <text class="tiny" x="560" y="596" text-anchor="middle">0.1 m</text>
+</svg>
