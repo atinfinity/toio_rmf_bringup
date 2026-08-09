@@ -164,8 +164,13 @@ ROS 2 環境を有効にしたシェルで起動すること(このワークス�
 ```bash
 docker create --name tmp toio-rmf-dashboard:latest
 docker cp tmp:/opt/dashboard ./dashboard-dist && docker rm tmp
-cd dashboard-dist && python3 -m http.server 3000
+npx serve -s dashboard-dist -l 3000
 ```
+
+**SPA フォールバックのある配信を使うこと。** `python3 -m http.server` では
+`/robots` や `/tasks` を直接開いた場合とリロードで 404 になる(コンテナの
+ENTRYPOINT が `serve -sn` なのはこのため)。`serve` を使えない場合は
+`SimpleHTTPRequestHandler` で存在しないパスを `index.html` に振り替える。
 
 イメージのビルドだけは amd64 が要る。Linux(amd64)機で一度ビルドして
 `dist` を持ってくれば、macOS 側に Docker は要らない。
@@ -252,6 +257,25 @@ macOS + 実機 toio で確認 (2026-08-10)。`jazzy` は `index-DJmLw7mG.js` で
 
 `DASHBOARD_ZOOM` を調整して再ビルドする。ズームは `2^z` ピクセル毎メートル相当で、
 値を1増やすと2倍に拡大される。
+
+**床面図がまったく見えない場合はズームではなくマーカーのサイズが原因**。
+rmf-dashboard-framework の描画サイズは数十m級の建物向けにハードコードされており、
+toio のマット(A4 で 0.297 x 0.210 m)では床面図を完全に覆い隠す:
+
+| 描画物 | 実サイズ | 出典 |
+|---|---|---|
+| waypoint(立方体) | 一辺 **0.65 m**(マット幅の2.2倍) | `shape-three-rendering.tsx` の `boxGeometry [1.3,1.3,1.3]` × `scale 0.5` |
+| waypoint(円) | 半径 **0.3 m** | 同 `Circle args={[0.3, 64]}` |
+| waypoint の高さ | z = **4 m** | 同 `HEIGHT = 8` |
+| ロボット | `DEFAULT_ROBOT_SCALE = 0.003` | `map.tsx`(フリート設定で上書き可) |
+
+いずれもリテラルでパラメータ化されていないため、ダッシュボード側の設定では変えられない。
+**レイヤボタンから `Waypoints` や `Robots` のチェックを外すと床面図が見える**。
+A4 マットで確認済み (2026-08-10)。
+
+なお toio の床面図 PNG は 60x40px で、黒いのは外周1pxの枠だけ(内側は完全な白)なので、
+覆い隠すものを消しても見えるのは細い枠線だけになる。見栄えを良くするには
+`toio_rmf_maps` 側で床面図に中身を持たせる必要がある。
 
 **arm64 のマシンでビルドしたい**
 
