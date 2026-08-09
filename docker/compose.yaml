@@ -1,0 +1,57 @@
+# rmf-web(api-server + ダッシュボード)をコンテナで起動する。
+#
+# ROS 2 スタック(toio_rmf.launch.py)はホスト側でそのまま動かし、
+# コンテナは network_mode: host でホストの ROS 2 グラフに参加する。
+# api-server は ROS 2 ノードなので、ROS_DOMAIN_ID と RMW_IMPLEMENTATION を
+# ホストと揃えないとフリートが見えない。
+#
+# 手順は docs/DASHBOARD.md を参照。
+
+name: toio-rmf-web
+
+services:
+  api-server:
+    image: ghcr.io/open-rmf/rmf-web/api-server:${RMF_WEB_IMAGE_TAG:-jazzy-nightly}
+    network_mode: host
+    environment:
+      RMF_API_SERVER_CONFIG: /ws/toio_config.py
+      # ホスト側の ROS 2 環境と一致させる
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+      # シミュレーション実行時は true、実機運用時は false
+      USE_SIM_TIME: ${USE_SIM_TIME:-true}
+      # 別マシンのブラウザから開く場合は 0.0.0.0 と実IPを指定する
+      RMF_API_SERVER_HOST: ${RMF_API_SERVER_HOST:-127.0.0.1}
+      RMF_API_SERVER_PUBLIC_URL: ${RMF_API_SERVER_PUBLIC_URL:-http://localhost:8000}
+      RMF_API_SERVER_LOG_LEVEL: ${RMF_API_SERVER_LOG_LEVEL:-INFO}
+      TZ: ${TZ:-Asia/Tokyo}
+    volumes:
+      - ./api-server/toio_config.py:/ws/toio_config.py:ro
+      - api-server-run:/ws/run
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        # 未指定なら main.tsx 側の既定値が使われる
+        VITE_TOIO_DEFAULT_ZOOM: ${DASHBOARD_ZOOM:-}
+        VITE_TOIO_DEFAULT_ROBOT_ZOOM: ${DASHBOARD_ROBOT_ZOOM:-}
+        VITE_TOIO_API_SERVER_URL: ${DASHBOARD_API_SERVER_URL:-}
+        VITE_TOIO_TRAJECTORY_SERVER_URL: ${DASHBOARD_TRAJECTORY_SERVER_URL:-}
+        # マーカーの実寸(m)。未指定なら upstream の既定値
+        VITE_TOIO_ROBOT_RADIUS: ${DASHBOARD_ROBOT_RADIUS:-}
+        VITE_TOIO_WAYPOINT_SIZE: ${DASHBOARD_WAYPOINT_SIZE:-}
+        VITE_TOIO_WAYPOINT_RADIUS: ${DASHBOARD_WAYPOINT_RADIUS:-}
+        VITE_TOIO_MARKER_HEIGHT: ${DASHBOARD_MARKER_HEIGHT:-}
+        VITE_TOIO_LABEL_SIZE: ${DASHBOARD_LABEL_SIZE:-}
+    image: toio-rmf-dashboard:latest
+    network_mode: host
+    environment:
+      PORT: ${DASHBOARD_PORT:-3000}
+    depends_on:
+      - api-server
+    restart: unless-stopped
+
+volumes:
+  api-server-run:

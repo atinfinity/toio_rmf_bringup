@@ -1,0 +1,134 @@
+--- a/packages/rmf-dashboard-framework/src/components/map/camera-control.tsx	2026-08-10 03:12:45
++++ b/packages/rmf-dashboard-framework/src/components/map/camera-control.tsx	2026-08-10 03:12:45
+@@ -19,7 +19,14 @@
+ 
+   useEffect(() => {
+     const controls = new OrbitControls(camera, gl.domElement);
+-    controls.target = new Vector3(0, 0, -Number.MAX_SAFE_INTEGER);
++    // OrbitControls.update() recomputes camera.position as target + offset on
++    // every frame. With -Number.MAX_SAFE_INTEGER the float64 spacing at that
++    // magnitude is 1.0, so a camera only centimetres above the floor loses its
++    // z entirely and the whole scene disappears. A building-scale scene has a
++    // camera metres up and survives the rounding; a 0.30 x 0.20 m toio mat does
++    // not. Keep the target far enough to read as "straight down" but close
++    // enough to stay precise.
++    controls.target = new Vector3(0, 0, -1000);
+     controls.enableRotate = false;
+     controls.enableDamping = false;
+     controls.enableZoom = true;
+--- a/packages/rmf-dashboard-framework/src/components/map/circle-shape.tsx	2026-08-10 02:12:10
++++ b/packages/rmf-dashboard-framework/src/components/map/circle-shape.tsx	2026-08-10 02:12:28
+@@ -12,6 +12,17 @@
+   segment: number;
+ }
+ 
++// toio のような小さなマット向けに、マーカーの実寸をビルド時に上書きできるように
++// する。既定値は upstream のまま。Vite が VITE_ 接頭辞の環境変数を埋め込む。
++const envNumber = (key: string, fallback: number): number => {
++  const raw = (import.meta.env as unknown as Record<string, string | undefined>)[key];
++  if (raw === undefined || raw === '') {
++    return fallback;
++  }
++  const value = Number(raw);
++  return Number.isFinite(value) ? value : fallback;
++};
++
+ export const CircleShape = ({
+   position,
+   rotation,
+@@ -21,7 +32,7 @@
+   onPointerOver,
+   onPointerOut,
+ }: CircleShapeProps): JSX.Element => {
+-  const SCALED_RADIUS = 0.7;
++  const SCALED_RADIUS = envNumber('VITE_TOIO_ROBOT_RADIUS', 0.7);
+ 
+   const rotatedX = position.x + SCALED_RADIUS * Math.cos(rotation.z);
+   const rotatedY = position.y + SCALED_RADIUS * Math.sin(rotation.z);
+--- a/packages/rmf-dashboard-framework/src/components/map/robot-three-maker.tsx	2026-08-10 03:47:26
++++ b/packages/rmf-dashboard-framework/src/components/map/robot-three-maker.tsx	2026-08-10 03:47:27
+@@ -7,6 +7,17 @@
+ import { debounce } from './shape-three-rendering';
+ import { TextThreeRendering } from './text-maker';
+ 
++// toio のような小さなマット向けに、ラベルの実寸をビルド時に上書きできるように
++// する。既定値は upstream のまま。Vite が VITE_ 接頭辞の環境変数を埋め込む。
++const envNumber = (key: string, fallback: number): number => {
++  const raw = (import.meta.env as unknown as Record<string, string | undefined>)[key];
++  if (raw === undefined || raw === '') {
++    return fallback;
++  }
++  const value = Number(raw);
++  return Number.isFinite(value) ? value : fallback;
++};
++
+ export interface RobotData {
+   fleet: string;
+   name: string;
+@@ -122,7 +133,12 @@
+         </mesh>
+       )}
+       {robotLabel && fontPath && fontPath.length > 0 ? (
+-        <Text color="black" font={fontPath} fontSize={0.5} position={position}>
++        <Text
++          color="black"
++          font={fontPath}
++          fontSize={envNumber('VITE_TOIO_LABEL_SIZE', 0.5)}
++          position={position}
++        >
+           {robot.name}
+         </Text>
+       ) : robotLabel ? (
+--- a/packages/rmf-dashboard-framework/src/components/map/shape-three-rendering.tsx	2026-08-10 02:12:10
++++ b/packages/rmf-dashboard-framework/src/components/map/shape-three-rendering.tsx	2026-08-10 02:12:28
+@@ -8,6 +8,17 @@
+   circleShape: boolean;
+ }
+ 
++// toio のような小さなマット向けに、マーカーの実寸をビルド時に上書きできるように
++// する。既定値は upstream のまま。Vite が VITE_ 接頭辞の環境変数を埋め込む。
++const envNumber = (key: string, fallback: number): number => {
++  const raw = (import.meta.env as unknown as Record<string, string | undefined>)[key];
++  if (raw === undefined || raw === '') {
++    return fallback;
++  }
++  const value = Number(raw);
++  return Number.isFinite(value) ? value : fallback;
++};
++
+ export const debounce = (callback: () => void, delay: number): (() => void) => {
+   let timeoutId: number | null = null;
+ 
+@@ -28,7 +39,7 @@
+   text,
+   circleShape,
+ }: ShapeThreeRenderingProps): JSX.Element => {
+-  const HEIGHT = 8;
++  const HEIGHT = envNumber('VITE_TOIO_MARKER_HEIGHT', 8);
+   const ELEVATION = 0;
+   const positionZ = HEIGHT / 2 + ELEVATION;
+   const [isHovered, setIsHovered] = React.useState(false);
+@@ -46,7 +57,7 @@
+   return (
+     <>
+       {circleShape ? (
+-        <Circle args={[0.3, 64]} position={[position[0], position[1], positionZ]}>
++        <Circle args={[envNumber('VITE_TOIO_WAYPOINT_RADIUS', 0.3), 64]} position={[position[0], position[1], positionZ]}>
+           <meshBasicMaterial color={color} />
+         </Circle>
+       ) : (
+@@ -73,7 +84,13 @@
+                 </div>
+               </Html>
+             )}
+-            <boxGeometry args={[1.3, 1.3, 1.3]} />
++            <boxGeometry
++              args={[
++                envNumber('VITE_TOIO_WAYPOINT_SIZE', 1.3),
++                envNumber('VITE_TOIO_WAYPOINT_SIZE', 1.3),
++                envNumber('VITE_TOIO_WAYPOINT_SIZE', 1.3),
++              ]}
++            />
+             <meshStandardMaterial color={color} opacity={0.6} transparent />
+           </mesh>
+         </group>
