@@ -38,6 +38,10 @@ flowchart LR
   (`sudo apt install docker.io docker-compose-v2` など)
 - `docs/SETUP.md` の環境構築が済んでいること
 - ダッシュボードのベースイメージ `minimal-rmf` は **linux/amd64 のみ**公開されている
+- **Docker Desktop for Mac / Windows では使えない。** コンテナが Linux VM
+  の別ネットワーク名前空間で動くため DDS が届かず、タスク投入ができない。
+  さらに `ROS_DOMAIN_ID` をホストと揃えると**ホスト側の ROS 2 が起動しなくなる**
+  (下記トラブルシュート参照)。Linux ホストで実行すること
 
 ## 起動手順
 
@@ -127,13 +131,34 @@ DASHBOARD_ZOOM=12 docker compose build dashboard && docker compose up -d
 
 api-server がホストの ROS 2 グラフに参加できていない可能性が高い。
 `ROS_DOMAIN_ID` と `RMW_IMPLEMENTATION` がホストと一致しているか確認する。
-`network_mode: host` が効かない環境(Docker Desktop for Mac / Windows)では
-そもそも DDS が届かないため、Linux ホストで実行すること。
 
 ```bash
 docker compose logs api-server
 docker compose exec api-server env | grep -E 'ROS_DOMAIN_ID|RMW_IMPLEMENTATION'
 ```
+
+**ホスト側の ROS 2 ノードが一切起動しなくなった(macOS)**
+
+Docker Desktop for Mac でコンテナを `network_mode: host` かつホストと同じ
+`ROS_DOMAIN_ID` で起動すると、`com.docker` が macOS 側で **UDP 7400 / 7401 /
+7410 / 7411**(ドメイン0の DDS discovery ポート)を占有し、ホストの participant
+が作れなくなる。ブリッジも RMF も次のエラーで即死し、原因が推測できない:
+
+```
+rclpy._rclpy_pybind11.RCLError: error creating node: error not set
+```
+
+`docker compose down` すれば即座に回復する。占有の確認:
+
+```bash
+lsof -nP -iUDP | grep -E ':74[01][01]'
+```
+
+コンテナの `ROS_DOMAIN_ID` を別値にすればホストは回復し、fleet state の表示も
+できる(fleet adapter からの WebSocket 経由のため DDS 不要)。ただし**タスク投入は
+できない** — api-server は ROS 2 トピック `/task_api_requests` /
+`/task_api_responses` 経由で投げるため、`rmf service timed out` (HTTP 500) になる。
+macOS で監視だけしたい場合の妥協案であって、本来の構成ではない。
 
 **タスクが実行されない / 時刻がおかしい**
 
