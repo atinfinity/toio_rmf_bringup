@@ -6,6 +6,71 @@ Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーショ�
 **環境構築**(新規PC): [docs/SETUP.md](docs/SETUP.md) 参照。
 `scripts/setup_environment.sh` でapt導入からビルドまで自動化できる。
 
+## 対応環境と関連パッケージ
+
+対応ディストリは **ROS 2 Jazzy(Ubuntu 24.04)のみ**。Open-RMFはJazzyでは
+バイナリdebが揃っているためソースビルド不要で、toio側の各パッケージのみ
+`~/dev_ws/src` にソースを置いてビルドする。
+
+```mermaid
+flowchart TB
+  subgraph jazzy["Ubuntu 24.04 + ROS 2 Jazzy"]
+    subgraph apt["apt で導入(ros-jazzy-*)"]
+      CORE["Open-RMF コア<br/>rmf_traffic_ros2 / rmf_task_ros2<br/>rmf_building_map_tools / rmf_visualization"]
+      CLI["rmf_demos_tasks<br/>タスク投入 CLI"]
+    end
+    subgraph src["ソースからビルド(~/dev_ws/src)"]
+      BRINGUP["toio_rmf_bringup<br/>本パッケージ"]
+      FA["toio_fleet_adapter"]
+      MAPS["toio_rmf_maps"]
+      NAVI["toio_navigation<br/>Nav2 設定"]
+      GZ["toio_gazebo"]
+      DESC["toio_description"]
+      TR["toio_ros2<br/>実機 BLE ブリッジ"]
+    end
+  end
+
+  BRINGUP ==> CORE
+  BRINGUP ==> FA
+  BRINGUP ==> GZ
+  BRINGUP ==> NAVI
+  CLI -->|"タスク投入"| CORE
+  MAPS -->|"建物図"| CORE
+  MAPS -->|"navグラフ"| FA
+  CORE <-->|"入札・タスク割当<br/>FleetState・経路交渉"| FA
+  FA -->|"NavigateToPose"| NAVI
+  NAVI ---|"cmd_vel / TF"| GZ
+  NAVI -.-|"cmd_vel / TF"| TR
+  GZ -->|"TF で位置を報告"| FA
+  TR -.->|"toio/pose・battery_state"| FA
+  GZ --> DESC
+  TR --> DESC
+```
+
+太い矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時
+(`run_sim:=false`)だけ現れる接続を表す。
+
+`toio_fleet_adapter` は走行指令をNav2の `NavigateToPose` に委譲する一方、
+ロボットの位置は自分で受け取る。実機では `toio_ros2` の `toio/pose` と
+`toio/battery_state` を購読し、シミュレーションではそれらが無いため
+TF(`map` → ベースフレーム)にフォールバックする。`toio_description` は
+シミュレーションと実機の両方から参照される。
+
+| パッケージ | 入手方法 | ブランチ | 役割 |
+|---|---|---|---|
+| Open-RMF一式 | apt (`ros-jazzy-rmf-dev` ほか) | — | RMFコア |
+| `rmf_demos_tasks` | apt | — | タスク投入CLI |
+| `toio_rmf_bringup` | ソース | `main` | 本パッケージ。一括起動 |
+| `toio_fleet_adapter` | ソース | `main` | EasyFullControlアダプタ |
+| `toio_rmf_maps` | ソース | `main` | 建物図・navグラフ・座標整合の検証 |
+| `toio_navigation` | ソース | `jazzy` | Nav2設定・地図 |
+| `toio_gazebo` | ソース | `main` | マルチロボットのGazeboワールド |
+| `toio_description` | ソース | `main` | キューブのロボットモデル |
+| `toio_ros2` | ソース | `jazzy` | 実機のBLEブリッジ(シミュレーション時は不要) |
+
+ブランチはいずれも各リポジトリのデフォルトブランチで、`setup_environment.sh` が
+そのままcloneする。
+
 ## 起動(シミュレーション)
 
 ```bash
