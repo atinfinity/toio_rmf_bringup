@@ -107,7 +107,7 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
 - [ ] 2台のフリート登録と位置報告(RViz表示がマット上の実位置と一致)
 - [ ] 1台ずつの`go_to_place`(toio1→charger_2、完了後にtoio2→charger_1 など順次)
 - [ ] (任意・接触リスク認識のうえ)2台同時の交差タスク。charger付近の掠りを観察
-- [x] バッテリー離散値(10%刻み)の実測確認(`/toioN/toio/battery_state` の `percentage` を観察)
+- [ ] バッテリー離散値(10/20/50/100%)の実測確認(`/toioN/toio/battery_level` を観察)
 - [ ] 低バッテリー時のChargeBattery発行・チャージャー帰還
 - [ ] タスクキャンセル→再投入(`cancel_task -id <task_id>`)
 - [ ] BLE切断(キューブを持ち上げ等)→ 位置報告停止 → 再接続後の復帰
