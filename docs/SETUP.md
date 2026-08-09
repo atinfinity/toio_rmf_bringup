@@ -19,7 +19,7 @@ bash /tmp/toio_rmf_bringup/scripts/setup_environment.sh            # シミュ�
 スクリプトは冪等(再実行可)。処理内容:
 
 1. **apt**: `ros-jazzy-rmf-dev` ほかOpen-RMF一式(Jazzyはバイナリdebで完結、ソースビルド不要)、`ros-jazzy-tf-transformations`、(`--with-demos`時)fleet_manager用python依存
-2. **clone**: toio_ros2 / toio_navigation は `feature/open-rmf-integration` ブランチ、toio_description / toio_gazebo は `main`、RMF統合3リポジトリ、(`--with-demos`時)rmf_demos `jazzy`
+2. **clone**: toio_ros2 / toio_navigation は `jazzy`(デフォルト)、toio_description / toio_gazebo は `main`、RMF統合3リポジトリ、(`--with-demos`時)rmf_demos `jazzy`
 3. **rosdep**: Nav2等の依存解決
 4. (`--with-demos`時)**Gazeboモデルのシンボリックリンク**(下記ハマりどころ①)
 5. **colcon build**(rmf_demosのassets/tasks/bridgesはdeb使用のため`--packages-ignore`)
