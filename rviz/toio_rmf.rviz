@@ -62,8 +62,9 @@ Visualization Manager:
       Enabled: true
       Name: MapMarkers
       Namespaces:
-        labels: true
-        map: true
+        toio/lanes/L1: true
+        toio/waypoints/L1: true
+        toio/labels/L1: true
       Topic:
         Depth: 5
         Durability Policy: Transient Local
