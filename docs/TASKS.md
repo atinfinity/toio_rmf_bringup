@@ -36,10 +36,17 @@ flowchart LR
   FA -->|NavigateToPose| N2
   N1 -->|cmd_vel| R1
   N2 -->|cmd_vel| R2
-  R1 -.->|odom / pose| N1
-  R2 -.->|odom / pose| N2
+  R1 -.->|TF| N1
+  R2 -.->|TF| N2
+  R1 -.->|位置・バッテリ| FA
+  R2 -.->|位置・バッテリ| FA
   FA -.->|FleetState / TaskState| DISP
 ```
+
+走行指令はNav2に委譲されるが、ロボットの位置とバッテリは
+`toio_fleet_adapter` が自分で受け取る。実機では `toio_ros2` の
+`/toioN/toio/pose` と `/toioN/toio/battery_state` を購読し、
+シミュレーションではそれらが無いためTFにフォールバックする。
 
 2台が同じレーンを使おうとした場合の調停は `rmf_traffic_schedule` が行う。
 それとは別に、Nav2側でも `peer_robot_costmap_publisher` が相手機の位置を
@@ -111,7 +118,8 @@ sequenceDiagram
         A->>S: 経路の予約と他機との交渉
         A->>N: NavigateToPose 次の waypoint
         N->>R: cmd_vel
-        R-->>N: odom / pose
+        R-->>N: TF
+        R-->>A: 位置・バッテリ
         N-->>A: 到達 succeeded
         A-->>D: TaskState underway
     end
