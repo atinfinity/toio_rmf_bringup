@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 808 710" width="808" height="710" role="img" aria-labelledby="t d">
+  <title id="t">patrolタスクの走行経路(A3マット)</title>
+  <desc id="d">dispatch_patrol -p patrol_A patrol_D -n 3 を投入したときの走行経路。charger_1 から patrol_A へ移動し、patrol_A と patrol_D の往復を3周したのち、finishing_request の charge により charger_1 へ帰還する。</desc>
+  <style>
+    .bg    { fill: #ffffff; }
+    .mat   { fill: #eef2f7; stroke: #b6c2d1; stroke-width: 2; }
+    .lane  { stroke: #c2cbd6; stroke-width: 5; stroke-linecap: round; fill: none; }
+    .wp    { fill: #ffffff; stroke: #2f6fdb; stroke-width: 4; }
+    .chg   { fill: #fff4d6; stroke: #d9971a; stroke-width: 4; }
+    .route { stroke: #e5534b; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .rhead { fill: #e5534b; }
+    .appr  { stroke: #57606a; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 12 9; fill: none; }
+    .ahead { fill: #57606a; }
+    .ret   { stroke: #1a7f37; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 12 9; fill: none; }
+    .rethd { fill: #1a7f37; }
+    .bdg   { fill: #1f2328; }
+    .bdgt  { fill: #ffffff; font-size: 17px; font-weight: 700; }
+    .lbl   { fill: #1f2328; font-size: 20px; font-weight: 600; }
+    .mut   { fill: #57606a; font-size: 17px; }
+    .tiny  { fill: #57606a; font-size: 15px; }
+    .code  { fill: #1f2328; font-size: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .bolt  { fill: #d9971a; font-size: 18px; font-weight: 700; }
+    text   { font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif; }
+    @media (prefers-color-scheme: dark) {
+      .bg    { fill: #0d1117; }
+      .mat   { fill: #161b22; stroke: #30363d; }
+      .lane  { stroke: #444c56; }
+      .wp    { fill: #0d1117; stroke: #58a6ff; }
+      .chg   { fill: #3d2f0e; stroke: #d29922; }
+      .route { stroke: #ff7b72; }
+      .rhead { fill: #ff7b72; }
+      .appr  { stroke: #8b949e; }
+      .ahead { fill: #8b949e; }
+      .ret   { stroke: #3fb950; }
+      .rethd { fill: #3fb950; }
+      .bdg   { fill: #e6edf3; }
+      .bdgt  { fill: #0d1117; }
+      .lbl, .code { fill: #e6edf3; }
+      .mut, .tiny { fill: #8b949e; }
+      .bolt  { fill: #d29922; }
+    }
+  </style>
+
+  <rect class="bg" width="808" height="710"/>
+
+  <text class="lbl" x="110" y="40">patrol タスクの走行経路(A3マット)</text>
+  <text class="code" x="110" y="70">ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3</text>
+
+  <!-- mat: building.yaml pixel (0,0)-(84,60) at 7 svg px per map px, offset (110,100) -->
+  <rect class="mat" x="110" y="100" width="588" height="420" rx="8"/>
+
+  <!-- full nav graph, faded -->
+  <g class="lane">
+    <line x1="194" y1="310" x2="334" y2="198"/>
+    <line x1="194" y1="310" x2="334" y2="422"/>
+    <line x1="334" y1="198" x2="544" y2="198"/>
+    <line x1="334" y1="422" x2="544" y2="422"/>
+    <line x1="544" y1="198" x2="628" y2="310"/>
+    <line x1="544" y1="422" x2="628" y2="310"/>
+    <line x1="334" y1="198" x2="334" y2="422"/>
+    <line x1="544" y1="198" x2="544" y2="422"/>
+  </g>
+
+  <!-- (1) charger_1 -> patrol_A -->
+  <line class="appr" x1="210" y1="297" x2="318" y2="211"/>
+  <polygon class="ahead" points="0,-7 18,0 0,7" transform="translate(318,211) rotate(-38.7)"/>
+
+  <!-- (2) outbound patrol_A -> patrol_B -> patrol_D -->
+  <polyline class="route" points="352,198 544,198 544,404"/>
+  <polygon class="rhead" points="0,-9 21,0 0,9" transform="translate(455,198)"/>
+  <polygon class="rhead" points="0,-9 21,0 0,9" transform="translate(544,320) rotate(90)"/>
+  <polygon class="rhead" points="0,-9 21,0 0,9" transform="translate(544,404) rotate(90)"/>
+
+  <!-- (3) return patrol_D -> patrol_C -> patrol_A -->
+  <polyline class="route" points="526,422 334,422 334,216"/>
+  <polygon class="rhead" points="0,-9 21,0 0,9" transform="translate(423,422) rotate(180)"/>
+  <polygon class="rhead" points="0,-9 21,0 0,9" transform="translate(334,300) rotate(-90)"/>
+  <polygon class="rhead" points="0,-9 21,0 0,9" transform="translate(334,216) rotate(-90)"/>
+
+  <!-- (4) finishing_request: charge -> back to charger_1 (drawn parallel-offset from lane 3) -->
+  <polyline class="ret" points="532,434 330,434 190,322"/>
+  <polygon class="rethd" points="0,-7 18,0 0,7" transform="translate(190,322) rotate(-141.3)"/>
+
+  <!-- chargers -->
+  <rect class="chg" x="179" y="295" width="30" height="30" rx="5"/>
+  <text class="bolt" x="194" y="317" text-anchor="middle">⚡</text>
+  <text class="lbl" x="166" y="307" text-anchor="end">charger_1</text>
+  <text class="tiny" x="166" y="328" text-anchor="end">toio1 の待機/充電位置</text>
+
+  <rect class="chg" x="613" y="295" width="30" height="30" rx="5"/>
+  <text class="bolt" x="628" y="317" text-anchor="middle">⚡</text>
+  <text class="lbl" x="656" y="307">charger_2</text>
+
+  <!-- patrol waypoints -->
+  <circle class="wp" cx="334" cy="198" r="15"/>
+  <text class="lbl" x="334" y="170" text-anchor="middle">patrol_A</text>
+  <circle class="wp" cx="544" cy="198" r="15"/>
+  <text class="lbl" x="544" y="170" text-anchor="middle">patrol_B</text>
+  <circle class="wp" cx="334" cy="422" r="15"/>
+  <text class="lbl" x="334" y="480" text-anchor="middle">patrol_C</text>
+  <circle class="wp" cx="544" cy="422" r="15"/>
+  <text class="lbl" x="544" y="480" text-anchor="middle">patrol_D</text>
+
+  <!-- step badges -->
+  <circle class="bdg" cx="245" cy="231" r="15"/>
+  <text class="bdgt" x="245" y="237" text-anchor="middle">1</text>
+  <circle class="bdg" cx="439" cy="230" r="15"/>
+  <text class="bdgt" x="439" y="236" text-anchor="middle">2</text>
+  <circle class="bdg" cx="439" cy="390" r="15"/>
+  <text class="bdgt" x="439" y="396" text-anchor="middle">3</text>
+  <circle class="bdg" cx="240" cy="400" r="15"/>
+  <text class="bdgt" x="240" y="406" text-anchor="middle">4</text>
+
+  <!-- steps -->
+  <circle class="bdg" cx="123" cy="558" r="13"/>
+  <text class="bdgt" x="123" y="564" text-anchor="middle">1</text>
+  <text class="mut" x="146" y="564">受注時の現在地から最初の巡回先 patrol_A へ移動</text>
+
+  <circle class="bdg" cx="123" cy="590" r="13"/>
+  <text class="bdgt" x="123" y="596" text-anchor="middle">2</text>
+  <text class="mut" x="146" y="596">往路 patrol_A → patrol_D</text>
+
+  <circle class="bdg" cx="123" cy="622" r="13"/>
+  <text class="bdgt" x="123" y="628" text-anchor="middle">3</text>
+  <text class="mut" x="146" y="628">復路 patrol_D → patrol_A(次の周回の開始)。2 と 3 を 3 周繰り返す</text>
+
+  <circle class="bdg" cx="123" cy="654" r="13"/>
+  <text class="bdgt" x="123" y="660" text-anchor="middle">4</text>
+  <text class="mut" x="146" y="660">3周終了後、finishing_request: "charge" で charger_1 へ帰還・充電待機</text>
+
+  <text class="tiny" x="110" y="692">※ 図は charger_1 待機からの例。経路はRMFが都度計画(A–B–D と A–C–D は等長 0.31 m)</text>
+</svg>
