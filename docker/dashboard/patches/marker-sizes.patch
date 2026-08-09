@@ -1,3 +1,21 @@
+--- a/packages/rmf-dashboard-framework/src/components/map/camera-control.tsx	2026-08-10 03:12:45
++++ b/packages/rmf-dashboard-framework/src/components/map/camera-control.tsx	2026-08-10 03:12:45
+@@ -19,7 +19,14 @@
+ 
+   useEffect(() => {
+     const controls = new OrbitControls(camera, gl.domElement);
+-    controls.target = new Vector3(0, 0, -Number.MAX_SAFE_INTEGER);
++    // OrbitControls.update() recomputes camera.position as target + offset on
++    // every frame. With -Number.MAX_SAFE_INTEGER the float64 spacing at that
++    // magnitude is 1.0, so a camera only centimetres above the floor loses its
++    // z entirely and the whole scene disappears. A building-scale scene has a
++    // camera metres up and survives the rounding; a 0.30 x 0.20 m toio mat does
++    // not. Keep the target far enough to read as "straight down" but close
++    // enough to stay precise.
++    controls.target = new Vector3(0, 0, -1000);
+     controls.enableRotate = false;
+     controls.enableDamping = false;
+     controls.enableZoom = true;
 --- a/packages/rmf-dashboard-framework/src/components/map/circle-shape.tsx	2026-08-10 02:12:10
 +++ b/packages/rmf-dashboard-framework/src/components/map/circle-shape.tsx	2026-08-10 02:12:28
 @@ -12,6 +12,17 @@

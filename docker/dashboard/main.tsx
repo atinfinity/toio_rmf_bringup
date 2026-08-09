@@ -50,12 +50,12 @@ const num = (key: string, fallback: number): number => {
   return Number.isFinite(value) ? value : fallback;
 };
 
-// ズームは「2^z ピクセル毎メートル」相当。デモの既定 6 は約 64 px/m で、
-// 15m 級の建物を画面に収める想定になっている。toio の A3 マットは
-// 横 0.42 m しかないため、同じ見え方にするには z = 11(約 2000 px/m)前後
-// が必要になる。実際の表示を見ながら調整すること。
-const DEFAULT_ZOOM = num('VITE_TOIO_DEFAULT_ZOOM', 11);
-const DEFAULT_ROBOT_ZOOM = num('VITE_TOIO_DEFAULT_ROBOT_ZOOM', 13);
+// ズームは「1メートルあたりのピクセル数」(線形)。camera.zoom が
+// react-three-fiber のピクセル基準フラスタムに渡るため、2^z ではない。
+// デモの既定 6 は 6 px/m で数十m級の建物向け。A4 マット(0.297 x 0.210 m)を
+// 画面いっぱいに出すには 2000 前後が要る(実測: 2000 で 569 x 369 px)。
+const DEFAULT_ZOOM = num('VITE_TOIO_DEFAULT_ZOOM', 2000);
+const DEFAULT_ROBOT_ZOOM = num('VITE_TOIO_DEFAULT_ROBOT_ZOOM', 4000);
 
 const API_SERVER_URL = str('VITE_TOIO_API_SERVER_URL', 'http://localhost:8000');
 // トラジェクトリサーバは rmf_visualization の schedule_visualizer_node が
