@@ -44,6 +44,7 @@ services:
         VITE_TOIO_WAYPOINT_SIZE: ${DASHBOARD_WAYPOINT_SIZE:-}
         VITE_TOIO_WAYPOINT_RADIUS: ${DASHBOARD_WAYPOINT_RADIUS:-}
         VITE_TOIO_MARKER_HEIGHT: ${DASHBOARD_MARKER_HEIGHT:-}
+        VITE_TOIO_LABEL_SIZE: ${DASHBOARD_LABEL_SIZE:-}
     image: toio-rmf-dashboard:latest
     network_mode: host
     environment:

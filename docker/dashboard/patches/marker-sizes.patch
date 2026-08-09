@@ -45,6 +45,40 @@
  
    const rotatedX = position.x + SCALED_RADIUS * Math.cos(rotation.z);
    const rotatedY = position.y + SCALED_RADIUS * Math.sin(rotation.z);
+--- a/packages/rmf-dashboard-framework/src/components/map/robot-three-maker.tsx	2026-08-10 03:47:26
++++ b/packages/rmf-dashboard-framework/src/components/map/robot-three-maker.tsx	2026-08-10 03:47:27
+@@ -7,6 +7,17 @@
+ import { debounce } from './shape-three-rendering';
+ import { TextThreeRendering } from './text-maker';
+ 
++// toio のような小さなマット向けに、ラベルの実寸をビルド時に上書きできるように
++// する。既定値は upstream のまま。Vite が VITE_ 接頭辞の環境変数を埋め込む。
++const envNumber = (key: string, fallback: number): number => {
++  const raw = (import.meta.env as unknown as Record<string, string | undefined>)[key];
++  if (raw === undefined || raw === '') {
++    return fallback;
++  }
++  const value = Number(raw);
++  return Number.isFinite(value) ? value : fallback;
++};
++
+ export interface RobotData {
+   fleet: string;
+   name: string;
+@@ -122,7 +133,12 @@
+         </mesh>
+       )}
+       {robotLabel && fontPath && fontPath.length > 0 ? (
+-        <Text color="black" font={fontPath} fontSize={0.5} position={position}>
++        <Text
++          color="black"
++          font={fontPath}
++          fontSize={envNumber('VITE_TOIO_LABEL_SIZE', 0.5)}
++          position={position}
++        >
+           {robot.name}
+         </Text>
+       ) : robotLabel ? (
 --- a/packages/rmf-dashboard-framework/src/components/map/shape-three-rendering.tsx	2026-08-10 02:12:10
 +++ b/packages/rmf-dashboard-framework/src/components/map/shape-three-rendering.tsx	2026-08-10 02:12:28
 @@ -8,6 +8,17 @@
