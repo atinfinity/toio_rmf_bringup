@@ -11,8 +11,14 @@ ARG BASE_IMAGE=ghcr.io/open-rmf/rmf-web/minimal-rmf:jazzy-nightly
 
 FROM $BASE_IMAGE AS build
 
-# ダッシュボードのソースを取得する rmf-web のリビジョン。ROS 2 Jazzy 向けは jazzy ブランチ
-ARG RMF_WEB_REF=jazzy
+# ダッシュボードのソースを取得する rmf-web のリビジョン。
+#
+# 本来は ROS 2 Jazzy 向けの jazzy ブランチを使いたいが、その先端でビルドすると
+# react-router の invariant で白画面になる(upstream 側の問題。upstream 公式の
+# demo-dashboard:jazzy-nightly でも同じ位置で再現する)。Update deps (#1083) の
+# 直前のリビジョンに固定して回避している。upstream が直ったら jazzy に戻すこと。
+# 詳細は docs/DASHBOARD.md の「ダッシュボードが白画面になる」を参照。
+ARG RMF_WEB_REF=c91f0d42
 
 # toio 向けのビルド時設定(Vite が VITE_ 接頭辞の環境変数を埋め込む)。
 # 未指定なら main.tsx 側の既定値が使われる
