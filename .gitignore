@@ -5,3 +5,6 @@ __pycache__/
 build/
 install/
 log/
+
+# docker compose のローカル設定(.env.example をコピーして使う)
+docker/.env
