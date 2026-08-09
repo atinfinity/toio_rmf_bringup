@@ -79,8 +79,8 @@ clone() {  # clone <repo> [branch]
   fi
   gh repo clone "$repo" -- ${branch:+-b "$branch"}
 }
-clone atinfinity/toio_ros2 feature/open-rmf-integration
-clone atinfinity/toio_navigation feature/open-rmf-integration
+clone atinfinity/toio_ros2
+clone atinfinity/toio_navigation
 clone atinfinity/toio_description
 clone atinfinity/toio_gazebo
 clone atinfinity/toio_rmf_maps
