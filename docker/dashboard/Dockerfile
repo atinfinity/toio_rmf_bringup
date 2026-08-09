@@ -26,15 +26,26 @@ ARG VITE_TOIO_DEFAULT_ZOOM=
 ARG VITE_TOIO_DEFAULT_ROBOT_ZOOM=
 ARG VITE_TOIO_API_SERVER_URL=
 ARG VITE_TOIO_TRAJECTORY_SERVER_URL=
+# マーカーの実寸(m)。patches/marker-sizes.patch がこれらを読むようにする。
+# 未指定なら upstream の既定値(ロボット半径 0.7m など)がそのまま使われる
+ARG VITE_TOIO_ROBOT_RADIUS=
+ARG VITE_TOIO_WAYPOINT_SIZE=
+ARG VITE_TOIO_WAYPOINT_RADIUS=
+ARG VITE_TOIO_MARKER_HEIGHT=
 ENV VITE_TOIO_DEFAULT_ZOOM=$VITE_TOIO_DEFAULT_ZOOM \
     VITE_TOIO_DEFAULT_ROBOT_ZOOM=$VITE_TOIO_DEFAULT_ROBOT_ZOOM \
     VITE_TOIO_API_SERVER_URL=$VITE_TOIO_API_SERVER_URL \
-    VITE_TOIO_TRAJECTORY_SERVER_URL=$VITE_TOIO_TRAJECTORY_SERVER_URL
+    VITE_TOIO_TRAJECTORY_SERVER_URL=$VITE_TOIO_TRAJECTORY_SERVER_URL \
+    VITE_TOIO_ROBOT_RADIUS=$VITE_TOIO_ROBOT_RADIUS \
+    VITE_TOIO_WAYPOINT_SIZE=$VITE_TOIO_WAYPOINT_SIZE \
+    VITE_TOIO_WAYPOINT_RADIUS=$VITE_TOIO_WAYPOINT_RADIUS \
+    VITE_TOIO_MARKER_HEIGHT=$VITE_TOIO_MARKER_HEIGHT
 
 # api-server は rmf-dashboard-framework の dev 依存なので python も必要
+# patch は patches/ をあてるのに使う
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-       ca-certificates curl python3 python3-venv \
+       ca-certificates curl patch python3 python3-venv \
   && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://get.pnpm.io/install.sh | bash -
@@ -56,6 +67,13 @@ RUN cd /ws \
       || (pnpm approve-builds --all && pnpm install --filter rmf-dashboard-framework...))
 
 # デモ用の設定を toio 向けに差し替えてからビルドする
+# マーカーの実寸を VITE_ 環境変数で上書きできるようにする。upstream は
+# ロボットを半径 0.7m の円、waypoint を一辺 0.65m の立方体で高さ 4m に描く
+# ハードコードで、A4 マット(0.297 x 0.210 m)では床面図が完全に覆われる。
+# 既定値は upstream のままなので、変数を渡さなければ挙動は変わらない。
+COPY patches/marker-sizes.patch /tmp/marker-sizes.patch
+RUN cd /ws && patch -p1 < /tmp/marker-sizes.patch
+
 COPY main.tsx /ws/packages/rmf-dashboard-framework/examples/demo/main.tsx
 RUN cd /ws/packages/rmf-dashboard-framework \
   && pnpm build:example examples/demo

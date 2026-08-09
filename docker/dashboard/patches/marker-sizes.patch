@@ -1,0 +1,82 @@
+--- a/packages/rmf-dashboard-framework/src/components/map/circle-shape.tsx	2026-08-10 02:12:10
++++ b/packages/rmf-dashboard-framework/src/components/map/circle-shape.tsx	2026-08-10 02:12:28
+@@ -12,6 +12,17 @@
+   segment: number;
+ }
+ 
++// toio のような小さなマット向けに、マーカーの実寸をビルド時に上書きできるように
++// する。既定値は upstream のまま。Vite が VITE_ 接頭辞の環境変数を埋め込む。
++const envNumber = (key: string, fallback: number): number => {
++  const raw = (import.meta.env as unknown as Record<string, string | undefined>)[key];
++  if (raw === undefined || raw === '') {
++    return fallback;
++  }
++  const value = Number(raw);
++  return Number.isFinite(value) ? value : fallback;
++};
++
+ export const CircleShape = ({
+   position,
+   rotation,
+@@ -21,7 +32,7 @@
+   onPointerOver,
+   onPointerOut,
+ }: CircleShapeProps): JSX.Element => {
+-  const SCALED_RADIUS = 0.7;
++  const SCALED_RADIUS = envNumber('VITE_TOIO_ROBOT_RADIUS', 0.7);
+ 
+   const rotatedX = position.x + SCALED_RADIUS * Math.cos(rotation.z);
+   const rotatedY = position.y + SCALED_RADIUS * Math.sin(rotation.z);
+--- a/packages/rmf-dashboard-framework/src/components/map/shape-three-rendering.tsx	2026-08-10 02:12:10
++++ b/packages/rmf-dashboard-framework/src/components/map/shape-three-rendering.tsx	2026-08-10 02:12:28
+@@ -8,6 +8,17 @@
+   circleShape: boolean;
+ }
+ 
++// toio のような小さなマット向けに、マーカーの実寸をビルド時に上書きできるように
++// する。既定値は upstream のまま。Vite が VITE_ 接頭辞の環境変数を埋め込む。
++const envNumber = (key: string, fallback: number): number => {
++  const raw = (import.meta.env as unknown as Record<string, string | undefined>)[key];
++  if (raw === undefined || raw === '') {
++    return fallback;
++  }
++  const value = Number(raw);
++  return Number.isFinite(value) ? value : fallback;
++};
++
+ export const debounce = (callback: () => void, delay: number): (() => void) => {
+   let timeoutId: number | null = null;
+ 
+@@ -28,7 +39,7 @@
+   text,
+   circleShape,
+ }: ShapeThreeRenderingProps): JSX.Element => {
+-  const HEIGHT = 8;
++  const HEIGHT = envNumber('VITE_TOIO_MARKER_HEIGHT', 8);
+   const ELEVATION = 0;
+   const positionZ = HEIGHT / 2 + ELEVATION;
+   const [isHovered, setIsHovered] = React.useState(false);
+@@ -46,7 +57,7 @@
+   return (
+     <>
+       {circleShape ? (
+-        <Circle args={[0.3, 64]} position={[position[0], position[1], positionZ]}>
++        <Circle args={[envNumber('VITE_TOIO_WAYPOINT_RADIUS', 0.3), 64]} position={[position[0], position[1], positionZ]}>
+           <meshBasicMaterial color={color} />
+         </Circle>
+       ) : (
+@@ -73,7 +84,13 @@
+                 </div>
+               </Html>
+             )}
+-            <boxGeometry args={[1.3, 1.3, 1.3]} />
++            <boxGeometry
++              args={[
++                envNumber('VITE_TOIO_WAYPOINT_SIZE', 1.3),
++                envNumber('VITE_TOIO_WAYPOINT_SIZE', 1.3),
++                envNumber('VITE_TOIO_WAYPOINT_SIZE', 1.3),
++              ]}
++            />
+             <meshStandardMaterial color={color} opacity={0.6} transparent />
+           </mesh>
+         </group>
