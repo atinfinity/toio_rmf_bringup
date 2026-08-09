@@ -156,8 +156,10 @@ def generate_launch_description():
         GroupAction([
             # The fleet-states visualizer draws each robot as a sphere of
             # <fleet_name>_radius (default 0.5 m, which covers the whole
-            # mat); override it with the toio footprint radius
-            SetParameter(name='toio_radius', value=0.023),
+            # mat); override it with half the width of the cube, which is
+            # 32 mm square. The nav2 footprint half-diagonal (0.023) makes a
+            # sphere noticeably wider than the robot it stands for.
+            SetParameter(name='toio_radius', value=0.016),
             IncludeLaunchDescription(
                 XMLLaunchDescriptionSource(
                     os.path.join(
