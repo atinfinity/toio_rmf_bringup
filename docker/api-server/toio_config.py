@@ -1,4 +1,5 @@
-"""rmf-web api-server の設定(toio 環境向け)。
+"""
+rmf-web api-server の設定(toio 環境向け).
 
 upstream の ``sqlite_local_config.py`` は ``use_sim_time`` を true に固定して
 いるため、実機運用(``use_sim_time:=false``)でそのまま使うと RMF ノード群と
