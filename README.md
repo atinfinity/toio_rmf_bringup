@@ -35,19 +35,26 @@ flowchart TB
   BRINGUP ==> GZ
   BRINGUP ==> NAVI
   CLI -->|"タスク投入"| CORE
-  MAPS -->|"建物図・navグラフ"| CORE
-  MAPS --> FA
+  MAPS -->|"建物図"| CORE
+  MAPS -->|"navグラフ"| FA
+  CORE <-->|"入札・タスク割当<br/>FleetState・経路交渉"| FA
   FA -->|"NavigateToPose"| NAVI
-  GZ --> DESC
   NAVI ---|"cmd_vel / TF"| GZ
   NAVI -.-|"cmd_vel / TF"| TR
+  GZ -->|"TF で位置を報告"| FA
+  TR -.->|"toio/pose・battery_state"| FA
+  GZ --> DESC
+  TR --> DESC
 ```
 
-太い矢印は `toio_rmf.launch.py` が起動するもの。Nav2とロボット層は `cmd_vel` と
-TFのトピックでつながり、シミュレーション(`toio_gazebo`、`ros_gz_bridge` 経由)と
-実機(`toio_ros2`、BLE経由)は排他的に使う(破線は `run_sim:=false` として
-別端末で起動する場合)。`toio_fleet_adapter` はNav2までしか見ないため、
-シミュレーションと実機のどちらでも同じ構成で動く。
+太い矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時
+(`run_sim:=false`)だけ現れる接続を表す。
+
+`toio_fleet_adapter` は走行指令をNav2の `NavigateToPose` に委譲する一方、
+ロボットの位置は自分で受け取る。実機では `toio_ros2` の `toio/pose` と
+`toio/battery_state` を購読し、シミュレーションではそれらが無いため
+TF(`map` → ベースフレーム)にフォールバックする。`toio_description` は
+シミュレーションと実機の両方から参照される。
 
 | パッケージ | 入手方法 | ブランチ | 役割 |
 |---|---|---|---|
