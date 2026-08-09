@@ -39,10 +39,15 @@ flowchart TB
   MAPS --> FA
   FA -->|"NavigateToPose"| NAVI
   GZ --> DESC
-  TR -.->|"run_sim:=false のとき別途起動"| NAVI
+  NAVI ---|"cmd_vel / TF"| GZ
+  NAVI -.-|"cmd_vel / TF"| TR
 ```
 
-太い矢印が `toio_rmf.launch.py` から起動されるものを表す。
+太い矢印は `toio_rmf.launch.py` が起動するもの。Nav2とロボット層は `cmd_vel` と
+TFのトピックでつながり、シミュレーション(`toio_gazebo`、`ros_gz_bridge` 経由)と
+実機(`toio_ros2`、BLE経由)は排他的に使う(破線は `run_sim:=false` として
+別端末で起動する場合)。`toio_fleet_adapter` はNav2までしか見ないため、
+シミュレーションと実機のどちらでも同じ構成で動く。
 
 | パッケージ | 入手方法 | ブランチ | 役割 |
 |---|---|---|---|
