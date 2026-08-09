@@ -101,6 +101,26 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 use_sim_time:=true
 ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 --use_sim_time
 ```
 
+`dispatch_patrol` の引数:
+
+| 引数 | デフォルト | 説明 |
+|---|---|---|
+| `-p` / `--places` | (必須) | 巡回先のwaypoint名。スペース区切りで複数指定し、並べた順に訪問する |
+| `-n` / `--rounds` | `1` | `-p` の並びを何周するか |
+| `-F` / `--fleet` | — | フリート名。本パッケージでは `toio` |
+| `-R` / `--robot` | — | ロボット名(`toio1` / `toio2`)。`-F` と併用したときだけ有効で、入札を経ずそのロボットへ直接割り当てる(`robot_task_request`)。`-F` 単独ならそのフリート内で入札させる |
+| `-st` / `--start_time` | `0` | 何秒後に開始するか |
+| `--use_sim_time` | 無効 | シミュレーション時刻を使う。`use_sim_time:=true` で起動した場合は付ける |
+
+`-pt` / `--priority` も受け付けるが、上流 `rmf_demos_tasks` 側が未実装
+(`todo(YV): Fill priority after schema is added`)でリクエストに反映されない。
+
+特定の1台だけを動かす例:
+
+```bash
+ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 -F toio -R toio1 --use_sim_time
+```
+
 各タスクの中身(走行経路・投入の流れ・go_to_place / ChargeBattery / キャンセル)は
 [docs/TASKS.md](docs/TASKS.md) に図で解説している。
 
