@@ -38,10 +38,11 @@ flowchart LR
   (`sudo apt install docker.io docker-compose-v2` など)
 - `docs/SETUP.md` の環境構築が済んでいること
 - ダッシュボードのベースイメージ `minimal-rmf` は **linux/amd64 のみ**公開されている
-- **Docker Desktop for Mac / Windows では使えない。** コンテナが Linux VM
-  の別ネットワーク名前空間で動くため DDS が届かず、タスク投入ができない。
-  さらに `ROS_DOMAIN_ID` をホストと揃えると**ホスト側の ROS 2 が起動しなくなる**
-  (下記トラブルシュート参照)。Linux ホストで実行すること
+- **この compose 構成は Docker Desktop for Mac / Windows では使えない。**
+  コンテナが Linux VM の別ネットワーク名前空間で動くため DDS が届かず、
+  タスク投入もマップ表示もできない。さらに `ROS_DOMAIN_ID` をホストと揃えると
+  **ホスト側の ROS 2 が起動しなくなる**(下記トラブルシュート参照)。
+  macOS では代わりに「[コンテナを使わない構成](#コンテナを使わない構成)」を使う
 
 ## 起動手順
 
@@ -124,6 +125,61 @@ DASHBOARD_ZOOM=12 docker compose build dashboard && docker compose up -d
 - [ ] Tasks タブから patrol を投入し、完走してチャージャーに帰還する
 - [ ] CLI(`dispatch_patrol`)で投入したタスクもダッシュボードに現れる
 - [ ] バッテリ残量が表示される
+
+## コンテナを使わない構成
+
+macOS など `network_mode: host` が本来の意味で使えない環境向け。
+api-server はただの Python アプリ、ダッシュボードはビルド済みの静的ファイルなので、
+**両方ともホストで直接動かせる**。ホストの ROS 2 環境をそのまま使うため、
+DDS の到達性・ポート衝突・amd64 エミュレーションのすべてが問題にならない。
+
+### api-server
+
+ROS 2 環境の Python に venv を重ねる。`--system-site-packages` により
+`rclpy` や `rmf_*_msgs` はホスト側のものがそのまま見える。
+
+```bash
+curl -fsSL https://github.com/open-rmf/rmf-web/archive/c91f0d42.tar.gz | tar zx
+
+python3 -m venv --system-site-packages ~/rmfweb_venv
+~/rmfweb_venv/bin/pip install rmf-web-c91f0d42/packages/api-server
+```
+
+依存は FastAPI / uvicorn / tortoise-orm / pyjwt などの純 Python パッケージのみで、
+ネイティブビルドは発生しない。設定は `docker/api-server/toio_config.py` を参考に
+`db_url` と `cache_directory` を書き込み可能な場所へ向けたものを用意する。
+
+```bash
+RMF_API_SERVER_CONFIG=<config.py> ~/rmfweb_venv/bin/python -m api_server
+```
+
+ROS 2 環境を有効にしたシェルで起動すること(このワークスペースなら
+`pixi run ~/rmfweb_venv/bin/python -m api_server`)。
+
+### ダッシュボード
+
+配信対象は `dist` の静的ファイル 3.5MB だけなので、ビルド済みイメージから
+取り出せば任意の HTTP サーバで配信できる。
+
+```bash
+docker create --name tmp toio-rmf-dashboard:latest
+docker cp tmp:/opt/dashboard ./dashboard-dist && docker rm tmp
+cd dashboard-dist && python3 -m http.server 3000
+```
+
+イメージのビルドだけは amd64 が要る。Linux(amd64)機で一度ビルドして
+`dist` を持ってくれば、macOS 側に Docker は要らない。
+
+### 動作確認済みの範囲
+
+macOS(pixi + RoboStack jazzy)+ 実機 toio で確認 (2026-08-10)。
+compose 構成では失敗する以下が、ネイティブでは動く:
+
+| 機能 | compose (macOS) | ネイティブ |
+|---|:-:|:-:|
+| fleet 状態(WebSocket 経由) | OK | OK |
+| `GET /building_map` | 404 | **OK** |
+| `POST /tasks/dispatch_task` | `rmf service timed out` | **OK**(入札・落札まで完走) |
 
 ## トラブルシュート
 
