@@ -59,6 +59,25 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
    - 床面図トピックは `/floorplan`(TRANSIENT_LOCAL)。RViz側もTransient Local購読が必要
 5. **cancel_task** は `--use_sim_time` 引数非対応(`-id` のみ)
 6. **toio.pyのバージョン**: pipの `toio.py` 最新は1.1.0(資料に1.10.0とある場合は誤記)
+7. **占有されたチャージャーを目的地にしない**: 他機が居るwaypointへ `go_to_place` すると、
+   到着マージで手前に停止した位置が相手のcostmapフットプリント内に入り、そこから先の
+   プランが全部失敗することがある(#5)。
+   ```
+   [toioN.planner_server]: GridBased plugin failed to plan from (0.22, -0.08)
+     to (0.15, -0.14): "Failed to create plan with tolerance of: 0.050000"
+   ```
+   **nav2は自力で抜けられない**。プランナは障害物内を始点にできず、リカバリ行動も
+   「今立っている場所が障害物」として動作を拒否する(`Collision Ahead - Exiting
+   DriveOnHeading`)。costmapのクリアも、ピアが `peer_robots_costmap` で再配信される
+   ため効かない。
+
+   現在は **fleet adapter が自動で後退して復帰する**(`toio:` の `escape:` 設定。
+   ゴール連続失敗2回で 0.05 m/s × 2秒、最大3回、マット外に出る場合は実行しない)。
+   それでも復帰しない場合(予算切れなど)は、手で後退させる:
+   ```bash
+   ros2 topic pub -r 10 /toio1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: -0.05}}"
+   ```
+   RMF運用時は `enable_goal_pose_motion: false` のため `/toioN/goal_pose` は使えない。
 
 ## 実機検証の手順(フェーズ5残り・A4マット)
 
