@@ -87,15 +87,33 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
 
 1. キューブのcube_id確認: 電源を入れ `ros2 run toio_ros2 toio_ros2_node` のログ、
    またはBLEスキャナでローカル名(`toio Core Cube-XXX` のXXX部分)を確認
-2. 起動:
+2. 起動(**この順序で**。理由は下の注意):
    ```bash
-   # 端末1: RMFコア+アダプタ(シミュレーションなし)
-   ros2 launch toio_rmf_bringup toio_rmf.launch.py run_sim:=false use_sim_time:=false mat:=a4
-   # 端末2: 実機ブリッジ(venv内で)。params_fileはデフォルトがA4なので指定不要
+   # 端末1: 実機ブリッジ(venv内で)。params_fileはデフォルトがA4なので指定不要
    source ~/toio_venv/bin/activate
    ros2 launch toio_ros2 toio_multi_bringup.launch.py cube_ids:=<ID1>,<ID2>
+   # 端末2: RMFコア+アダプタ(シミュレーションなし)。ブリッジが位置を出し始めてから
+   ros2 launch toio_rmf_bringup toio_rmf.launch.py run_sim:=false use_sim_time:=false mat:=a4
    ```
    ※RMF運用時は `enable_goal_pose_motion:=false` をtoio_ros2ノードに設定すること
+
+   > **注意: 逆順にすると nav2 が恒久的に起動失敗する**
+   >
+   > nav2 の costmap は活性化時に `map → toioN/base_link` の TF を待つが、これを
+   > 供給するのは実機ブリッジ側。待ち時間が `initial_transform_timeout` を超えると
+   > 活性化がエラーになり、lifecycle manager が bringup 全体を中止する:
+   >
+   > ```
+   > [toioN.lifecycle_manager_navigation]: Failed to bring up all requested nodes. Aborting bringup.
+   > ```
+   >
+   > **自動リトライは無く**、あとからブリッジを起動しても復旧しない(fleet adapter が
+   > `Nav2 rejected goal` を繰り返す)。全体を落として起動し直すしかない。
+   >
+   > RMF を先に起動してしまった場合は、`initial_transform_timeout` 以内にブリッジを
+   > 起動すれば間に合う。この値は toio_navigation の `nav2_params.yaml` で
+   > **300秒**に設定してある(nav2 の既定は60秒で、キューブの電源投入とBLE接続には
+   > 足りなかった)。
 
 ### 検証項目
 

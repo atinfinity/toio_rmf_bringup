@@ -92,7 +92,10 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 use_sim_time:=true
 | `server_uri` | `''` | rmf-web api-serverのURI(任意) |
 
 実機の場合は `run_sim:=false` とし、別端末で
-`ros2 launch toio_ros2 toio_multi_bringup.launch.py` を起動する。
+`ros2 launch toio_ros2 toio_multi_bringup.launch.py` を起動する。**実機ブリッジを先に
+起動すること** — nav2 の costmap がブリッジ由来の TF を待つため、逆順で
+`initial_transform_timeout` を超えると nav2 が恒久的に起動失敗する
+(詳細と復旧方法は [docs/SETUP.md](docs/SETUP.md) の「起動(2端末)」を参照)。
 
 ## タスク投入例
 
