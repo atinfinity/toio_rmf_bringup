@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Bring up the Open-RMF core, the toio fleet adapter and (optionally)
-the Gazebo simulation with Nav2 for a toio fleet in one command.
+"""
+Bring up a whole toio fleet with one command.
 
-The RMF core portion mirrors rmf_demos' common.launch.xml, minus the
-door/lift supervisors that a toio playground does not need.
+Starts the Open-RMF core, the toio fleet adapter and, optionally, the
+Gazebo simulation with Nav2. The RMF core portion mirrors rmf_demos'
+common.launch.xml, minus the door/lift supervisors that a toio
+playground does not need.
 """
 
 import os

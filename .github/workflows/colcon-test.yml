@@ -1,0 +1,40 @@
+name: colcon-test
+
+on: push
+
+jobs:
+  colcon-test:
+    runs-on: ubuntu-latest
+    container: ros:jazzy-ros-base
+    steps:
+      - name: Checkout toio_rmf_bringup
+        uses: actions/checkout@v4
+        with:
+          path: src/toio_rmf_bringup
+
+      # toio_rmf_maps and toio_fleet_adapter are exec dependencies that are
+      # not released to rosdep and live in separate private repositories,
+      # which the default GITHUB_TOKEN cannot check out, so skip their keys.
+      # Everything else is resolved, which is the point: the package is
+      # launch files, so an unresolvable key is the main risk.
+      - name: Install dependencies
+        shell: bash
+        run: |
+          apt-get update
+          rosdep update
+          rosdep install --from-paths src --ignore-src -y \
+            --skip-keys "toio_rmf_maps toio_fleet_adapter"
+
+      - name: Build
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --packages-up-to toio_rmf_bringup
+
+      - name: Test
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          colcon test --packages-select toio_rmf_bringup --event-handlers console_cohesion+
+          colcon test-result --verbose
