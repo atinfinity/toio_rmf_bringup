@@ -13,17 +13,34 @@ jobs:
           path: src/toio_rmf_bringup
 
       # toio_rmf_maps and toio_fleet_adapter are exec dependencies that are
-      # not released to rosdep and live in separate private repositories,
-      # which the default GITHUB_TOKEN cannot check out, so skip their keys.
-      # Everything else is resolved, which is the point: the package is
-      # launch files, so an unresolvable key is the main risk.
+      # not released to rosdep, so they are built from source here, along
+      # with toio_msgs which toio_fleet_adapter imports. Having the real
+      # packages in the workspace lets rosdep resolve every key instead of
+      # skipping them (atinfinity/toio_rmf_bringup#16).
+      - name: Checkout toio_rmf_maps
+        uses: actions/checkout@v7
+        with:
+          repository: atinfinity/toio_rmf_maps
+          path: src/toio_rmf_maps
+
+      - name: Checkout toio_fleet_adapter
+        uses: actions/checkout@v7
+        with:
+          repository: atinfinity/toio_fleet_adapter
+          path: src/toio_fleet_adapter
+
+      - name: Checkout toio_msgs
+        uses: actions/checkout@v7
+        with:
+          repository: atinfinity/toio_msgs
+          path: src/toio_msgs
+
       - name: Install dependencies
         shell: bash
         run: |
           apt-get update
           rosdep update
-          rosdep install --from-paths src --ignore-src -y \
-            --skip-keys "toio_rmf_maps toio_fleet_adapter"
+          rosdep install --from-paths src --ignore-src -y
 
       - name: Build
         shell: bash
