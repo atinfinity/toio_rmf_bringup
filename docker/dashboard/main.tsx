@@ -97,8 +97,8 @@ export default function App() {
       reportIssueLink="https://github.com/atinfinity/toio_rmf_bringup/issues"
       resources={{ fleets: {}, logos: { header: '/resources/defaultLogo.png' } }}
       tasks={{
-        // toio フリートの task_capabilities は loop(patrol)のみ true。
-        // delivery / clean を出しても落札されないため並べない
+        // フリート側は loop(patrol)と delivery が有効だが、ダッシュボード
+        // からの delivery 投入は未検証のため patrol のみ並べる(docs/TASKS.md)
         allowedTasks: [{ taskDefinitionId: 'patrol' }],
         pickupZones: [],
         cartIds: [],
