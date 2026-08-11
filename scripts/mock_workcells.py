@@ -30,10 +30,10 @@ toio_fleet_adapter, which performs those as actions in the same task.
 import argparse
 import sys
 
-from rmf_dispenser_msgs.msg import DispenserRequest, DispenserResult, DispenserState
-from rmf_ingestor_msgs.msg import IngestorRequest, IngestorResult, IngestorState
 import rclpy
 from rclpy.node import Node
+from rmf_dispenser_msgs.msg import DispenserRequest, DispenserResult, DispenserState
+from rmf_ingestor_msgs.msg import IngestorRequest, IngestorResult, IngestorState
 
 
 class MockWorkcell(Node):
