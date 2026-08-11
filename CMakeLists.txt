@@ -22,6 +22,10 @@ if(BUILD_TESTING)
   # toio_ros2 and toio_description as well)
   set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(test_mock_workcells test/test_mock_workcells.py
+    TIMEOUT 120)
 endif()
 
 ament_package()
