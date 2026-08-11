@@ -22,6 +22,7 @@ flowchart LR
   DISP["rmf_task_dispatcher"]
   SCHED["rmf_traffic_schedule<br/>rmf_traffic_blockade"]
   FA["toio_fleet_adapter<br/>(EasyFullControl)"]
+  W["toio_dispenser<br/>toio_ingestor<br/>(mockワークセル)"]
   N1["Nav2 /toio1"]
   N2["Nav2 /toio2"]
   R1["toio1<br/>Gazebo または実機"]
@@ -32,6 +33,8 @@ flowchart LR
   FA -->|BidResponse| DISP
   FA -->|経路の予約と交渉| SCHED
   SCHED -.->|交渉結果| FA
+  FA -->|DispenserRequest<br/>IngestorRequest| W
+  W -.->|Result| FA
   FA -->|NavigateToPose| N1
   FA -->|NavigateToPose| N2
   N1 -->|cmd_vel| R1
@@ -42,6 +45,9 @@ flowchart LR
   R2 -.->|位置・バッテリ| FA
   FA -.->|FleetState / TaskState| DISP
 ```
+
+mockワークセルは delivery タスクの荷役要求に応答するためのノードで、
+詳細は「[deliveryタスク](#delivery-タスク)」を参照。
 
 走行指令はNav2に委譲されるが、ロボットの位置とバッテリは
 `toio_fleet_adapter` が自分で受け取る。実機では `toio_ros2` の
@@ -65,12 +71,17 @@ A3=0.10 / A4=0.06 が自動設定される)。
 
 ### A4マット
 
-4頂点・4レーン、**時計回りの一方通行**。`patrol_C` / `patrol_D` は存在しない。
+6頂点・6レーン。`approach_1 → patrol_A → approach_2 → patrol_B → approach_1` の
+**時計回りの一方通行ループ**に、各チャージャーが approach からの短い双方向スパーで
+ぶら下がる。`patrol_C` / `patrol_D` は存在しない。
 
 ![A4マットのnavグラフ](images/navgraph_a4.svg)
 
 一方通行にしているのはマットが狭いためで、詳細は [README](../README.md) の
-「A4での2台同時運用の注意」を参照。
+「A4での2台同時運用の注意」を参照。チャージャーをループ上ではなくスパーの先に
+置いているのは、単に通過するだけのロボットが駐機中のロボットに突っ込まないため。
+A4のチャージャー頂点には `dock_name` が設定されており、到着の最終区間は Dock
+イベントとしてキューブ内蔵のターゲット走行で精密に停止する(A3側には無い)。
 
 ## patrol タスク
 
@@ -131,6 +142,67 @@ sequenceDiagram
 ロボットが落札する。したがって2台とも空いている場合、どちらが動くかは
 出発地点からの距離などで決まる。
 
+## delivery タスク
+
+pickup で荷物を受け取り、dropoff で降ろす搬送タスク。RMFの delivery では
+荷役そのものはロボットではなく**ワークセル(dispenser / ingestor)の仕事**で、
+フリート側は waypoint 間の移動だけを担当する。マット上に搬送できる物は無いため、
+`toio_rmf.launch.py` が起動する mockワークセル `toio_dispenser` /
+`toio_ingestor` が要求に応答してタスクを進める(実際には何も搬送しない)。
+
+```bash
+ros2 run rmf_demos_tasks dispatch_delivery -p patrol_A -ph toio_dispenser \
+  -d patrol_D -dh toio_ingestor --use_sim_time
+```
+
+| 引数 | 意味 |
+|---|---|
+| `-p` / `-d` | pickup / dropoff の waypoint 名 |
+| `-ph` / `-dh` | pickup / dropoff を処理するワークセル名(この環境では `toio_dispenser` / `toio_ingestor` 固定) |
+| `-pp` / `-dp` | 荷物の指定 `sku,数量`(省略可。mockワークセルは内容を見ない) |
+
+### 実行時のノード間のやりとり
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CLI as dispatch_delivery
+    participant D as rmf_task_dispatcher
+    participant A as toio_fleet_adapter
+    participant W as mockワークセル
+    participant N as Nav2 /toio1
+
+    CLI->>D: delivery 要求 pickup=patrol_A dropoff=patrol_D
+    D->>A: BidNotice 入札依頼
+    A-->>D: BidResponse → 落札
+    A->>N: NavigateToPose patrol_A
+    N-->>A: 到達 succeeded
+    A->>W: DispenserRequest (toio_dispenser)
+    Note over W: 3秒待って完了を返す<br/>(何も搬送しない)
+    W-->>A: DispenserResult SUCCESS
+    A->>N: NavigateToPose patrol_D
+    N-->>A: 到達 succeeded
+    A->>W: IngestorRequest (toio_ingestor)
+    W-->>A: IngestorResult SUCCESS
+    A-->>D: TaskState completed
+```
+
+ワークセルが要求を処理する間(既定3秒、`mock_workcells.py` の
+`--handle-seconds`)、ロボットは waypoint 上に停止して見える。
+
+注意点:
+
+- **標準の delivery ではロボットのLED・効果音は出ない。** pickup / dropoff は
+  ワークセル側で完結し、フリートアクション `delivery_pickup` /
+  `delivery_dropoff` は呼ばれない。キューブ側の見せ方が欲しい場合は後述の
+  [dispatch_action](#dispatch_action--フリートアクションの単独実行) を使う。
+- **RMF本体へのパッチが前提。** 素のRMFでは delivery 開始時に
+  `rmf_task_sequence` の型不一致で fleet_adapter が異常終了する
+  ([toio_rmf_bringup#20](https://github.com/atinfinity/toio_rmf_bringup/issues/20)
+  に調査結果と修正を記載)。
+- シミュレーション(A4)で完走を確認済み。実機ではワークセルへの要求→応答の
+  経路は未検証(ノードの起動までは確認済み)。
+
 ## その他のタスク
 
 ### go_to_place — 単一の目的地へ移動
@@ -143,6 +215,19 @@ ros2 run rmf_demos_tasks dispatch_go_to_place -p patrol_B --use_sim_time
 `-F toio -R toio1` でフリート名とロボット名を直接指定できる(入札を経ずに
 そのロボットへ割り当てられる)。
 
+### dispatch_action — フリートアクションの単独実行
+
+```bash
+ros2 run rmf_demos_tasks dispatch_action -s patrol_A -a delivery_pickup --use_sim_time
+```
+
+指定した waypoint へ移動し、フリートが宣言しているアクションを実行する。
+toioフリートが宣言しているのは `delivery_pickup` / `delivery_dropoff` の2つ。
+キューブには搬送機構が無いので、**その場で3秒保持し、LED(pickup=緑 /
+dropoff=青)と効果音で何をしているか見せる**名目実装になっている。
+保持時間・色・効果音はフリート設定(`toio_fleet_config_<mat>.yaml`)の
+`toio.actions` で変更できる。シミュレーション・実機とも動作確認済み。
+
 ### ChargeBattery — 自動発行される充電タスク
 
 明示的に投入するタスクではなく、RMFが必要と判断したときに自動で計画される。
@@ -151,7 +236,7 @@ ros2 run rmf_demos_tasks dispatch_go_to_place -p patrol_B --use_sim_time
 stateDiagram-v2
     direction LR
     待機: charger で待機・充電
-    実行中: patrol / go_to_place を実行
+    実行中: patrol / delivery などを実行
     充電帰還: ChargeBattery を自動計画
 
     [*] --> 待機
@@ -188,11 +273,13 @@ ros2 run rmf_demos_tasks cancel_task -id <task_id>
 | タスク | 投入方法 | 図 |
 |---|---|---|
 | patrol | `dispatch_patrol -p <places...> -n <rounds>` | [走行経路](#patrol-タスク) |
+| delivery | `dispatch_delivery -p <pickup> -ph toio_dispenser -d <dropoff> -dh toio_ingestor` | [投入の流れ](#delivery-タスク) |
 | go_to_place | `dispatch_go_to_place -p <place>` | — |
+| perform_action | `dispatch_action -s <place> -a delivery_pickup` | — |
 | ChargeBattery | RMFが自動計画 | [状態遷移](#chargebattery--自動発行される充電タスク) |
 | キャンセル | `cancel_task -id <task_id>` | — |
 
-`delivery` / `clean` はフリート設定の `task_capabilities` で無効にしているため、
+`clean` はフリート設定の `task_capabilities` で無効にしているため、
 投入しても落札されない。
 
 ## 関連ドキュメント
