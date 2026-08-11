@@ -135,7 +135,10 @@ def generate_launch_description():
         Node(
             package='toio_rmf_bringup',
             executable='mock_workcells.py',
-            name='mock_workcells',
+            # No name= here: the process runs one node per workcell and names
+            # them after their guid. Setting it renames both, which collides
+            # ("Publisher already registered for node name") and loses the
+            # distinction in the logs.
             output='both',
             arguments=[
                 '--dispensers', 'toio_dispenser',
