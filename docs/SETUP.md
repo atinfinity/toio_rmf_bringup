@@ -54,7 +54,8 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
    (toio_rmf.launch.py は `mat` 引数から自動設定)
 4. **RViz関連**(toio_rmf.launch.py / toio_rmf.rviz で対処済み):
    - fleet_states可視化の `<フリート名>_radius` デフォルトは0.5m(マット全体を覆う)→
-     `SetParameter` で `toio_radius: 0.023`
+     `SetParameter` で `toio_radius: 0.016`(キューブ幅32mmの半分。nav2フットプリントの
+     外接半径0.023だと実物より目に見えて大きい球になる)
    - navgraphs可視化の `lane_width` はソースで **最小0.1mにクランプ**(上流制約)
    - 床面図トピックは `/floorplan`(TRANSIENT_LOCAL)。RViz側もTransient Local購読が必要
 5. **cancel_task** は `--use_sim_time` 引数非対応(`-id` のみ)
@@ -78,26 +79,37 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
    ros2 topic pub -r 10 /toio1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: -0.05}}"
    ```
    RMF運用時は `enable_goal_pose_motion: false` のため `/toioN/goal_pose` は使えない。
+8. **deliveryタスクは素のRMF(aptのdeb)ではfleet_adapterが落ちる**: タスク開始直後に
+   `rmf_task_sequence` の型不一致で異常終了する(調査結果と1行修正は #20)。
+   patrol / go_to_place には影響しない。deliveryを試す場合は #20 のパッチを当てた
+   RMFのソースビルドが必要(mockワークセルを含むdelivery全体の仕組みは
+   [docs/TASKS.md](TASKS.md) 参照)
 
 ## 実機検証の手順(フェーズ5残り・A4マット)
 
 ### 前提(A4固有)
 
-- **toio_rmf_mapsのA4一方通行グラフ(PR #1)がマージ済み**であること
-  (未マージなら `fix/a4-one-way-loop` ブランチをチェックアウトしてビルド)
-- A4のnavグラフは**時計回りの一方通行ループ**:
-  `charger_1 → patrol_A → charger_2 → patrol_B → charger_1`
-  (waypointはこの4つのみ。A3のpatrol_C/Dは存在しない)
+- **toio_rmf_mapsがmainでビルド済み**であること(A4は一方通行化 #1 に加え、
+  #6 でチャージャーがループから外れてスパー化された)
+- A4のnavグラフ: `approach_1 → patrol_A → approach_2 → patrol_B → approach_1` の
+  **時計回りの一方通行ループ**(各0.064m)+ 各チャージャーは approach からの
+  短い**双方向スパー**の先(`dock_name` 付き)。タスクの目的地に使うのは
+  `patrol_A` / `patrol_B` / `charger_1` / `charger_2` の4つで、A3のpatrol_C/Dは存在しない
+- チャージャー到着の最終区間は Dock イベントになり、キューブ内蔵のターゲット走行で
+  精密停止する(toio_fleet_adapter#3。シミュレーションにはdockサーバが無いため
+  Nav2の結果だけで完了する)
 - peer costmapのフットプリントは自動で0.06(`peer_footprint_size:=auto`)
-- **既知の制約**: 2台が共有頂点(charger付近)で同時に入替るタイミングでは
-  角が掠る接触(シミュレーション実測35mm前後)が起き得る。A4での2台同時運用は
-  物理限界に近いため、検証は「1台ずつのタスク」を基本にし、2台同時テストは
-  接触リスクを認識のうえ実施すること(確実な非接触が必要ならA3を使用)
+- **既知の制約**: 2台が頂点付近で同時に入替るタイミングの角接触
+  (旧レイアウトでのシミュレーション実測35mm前後)。チャージャー通過時に内蔵走行が
+  駐機中の相手へ直進する衝突経路は toio_rmf_maps#6 のスパー化で解消済み
+  (駐機機ありの実機8回で接触0)。それでもA4での2台同時運用は物理限界に近いため、
+  検証は「1台ずつのタスク」を基本にし、2台同時テストは接触リスクを認識のうえ
+  実施すること(確実な非接触が必要ならA3を使用)
 
 ### キューブの初期配置
 
 マット左右中央付近のチャージャーwaypointに置く(だいたいで可、
-`max_merge_lane_distance: 0.15` の範囲で自動マージされる):
+`max_merge_lane_distance: 0.06` の範囲で自動マージされる):
 
 - toio1 → charger_1: マット左端から約5cm・上下中央
 - toio2 → charger_2: マット右端から約5cm・上下中央
@@ -136,7 +148,8 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
 
 ### 検証項目
 
-タスク例はA4のwaypoint名(`patrol_A` / `patrol_B` / `charger_1` / `charger_2`)を使う。
+タスク例はA4のwaypoint名(`patrol_A` / `patrol_B` / `charger_1` / `charger_2`)を使う
+(`approach_1` / `approach_2` は経由点で、目的地には通常使わない)。
 
 - [ ] patrolタスク完走(1台・3周):
       `ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_B -n 3`

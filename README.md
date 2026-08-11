@@ -138,10 +138,12 @@ navグラフ頂点(toio_rmf_maps参照):
 - A3: `charger_1` / `patrol_A` / `patrol_B` / `patrol_C` / `patrol_D` / `charger_2`(双方向格子)
 - A4: `patrol_A` / `patrol_B` / `approach_1` / `approach_2`(**時計回りの一方通行ループ**)+ `charger_1` / `charger_2`(approach からの双方向スパーの先)
 
-**A4での2台同時運用の注意**: マットが狭く(0.30×0.20m)、charger頂点付近で
-2台が同時に入替るタイミングでは角が接触し得る(シミュレーション実測)。
-2台での確実な非接触運用にはA3を推奨。peer costmapのフットプリントは
-`peer_footprint_size:=auto` でA3=0.10 / A4=0.06が自動設定される。
+**A4での2台同時運用の注意**: マットが狭く(0.30×0.20m)、2台が頂点付近で
+同時に入替るタイミングでは角が接触し得る(旧レイアウトでのシミュレーション実測)。
+チャージャー通過時にドックの内蔵走行が駐機中の相手へ直進する衝突経路は
+toio_rmf_maps#6 のスパー化で解消済み。2台での確実な非接触運用にはA3を推奨。
+peer costmapのフットプリントは `peer_footprint_size:=auto` で
+A3=0.10 / A4=0.06が自動設定される。
 
 ## 構成
 
@@ -150,4 +152,6 @@ navグラフ頂点(toio_rmf_maps参照):
   (rmf_demosのcommon.launch.xml相当。door/lift supervisorは不要のため省略)
 - toio_fleet_adapter: EasyFullControlアダプタ(名前空間付き
   NavigateToPoseアクションでNav2に接続)
+- mockワークセル: `toio_dispenser` / `toio_ingestor`
+  (`scripts/mock_workcells.py`。deliveryの荷役要求に応答する)
 - toio_gazebo + toio_navigation: 既存パッケージをそのままinclude

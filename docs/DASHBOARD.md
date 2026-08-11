@@ -115,7 +115,7 @@ DASHBOARD_ZOOM=12 docker compose build dashboard && docker compose up -d
 |---|---|---|
 | `defaultZoom` | `6`(約 64 px/m) | `11`(約 2000 px/m)。A3マットは 0.42 × 0.30 m しかないため |
 | `defaultRobotZoom` | `20` | `13` |
-| `allowedTasks` | patrol / delivery / compose-clean / custom_compose | **patrol のみ**。フリートの `task_capabilities` が loop だけ有効なため、他は投入しても落札されない |
+| `allowedTasks` | patrol / delivery / compose-clean / custom_compose | **patrol のみ**。delivery はフリート側で有効化済みだが、ダッシュボードからの投入は未検証のため並べていない(CLIからの投入は [docs/TASKS.md](TASKS.md) 参照) |
 | ドア・エレベータのアプリ | あり | 削除。`toio_rmf.launch.py` は door / lift supervisor を起動しない |
 
 ## 確認項目
@@ -301,7 +301,9 @@ Docker Desktop を再起動すると通るようになり、速度も大きく�
 
 `docker/dashboard/main.tsx` の `allowedTasks` に追加して再ビルドする。ただし
 フリート設定(`toio_fleet_config_<mat>.yaml`)の `task_capabilities` で
-有効になっていないタスクは落札されない。
+有効になっていないタスクは落札されない(現在有効なのは loop と delivery。
+delivery にはRMF本体へのパッチが必要 — [docs/TASKS.md](TASKS.md) 参照)。
+ダッシュボードからの delivery 投入は未検証。
 
 ## 関連ドキュメント
 
