@@ -129,6 +129,19 @@ def generate_launch_description():
     # Open-RMF core (mirrors rmf_demos common.launch.xml)
     # ------------------------------------------------------------------
     rmf_core = GroupAction([
+        # Delivery hands the pickup and dropoff to workcells rather than to
+        # the robot, and a play mat has none, so a delivery task would stall
+        # at the pickup without these (toio_fleet_adapter#2)
+        Node(
+            package='toio_rmf_bringup',
+            executable='mock_workcells.py',
+            name='mock_workcells',
+            output='both',
+            arguments=[
+                '--dispensers', 'toio_dispenser',
+                '--ingestors', 'toio_ingestor',
+            ],
+            parameters=[{'use_sim_time': use_sim_time}]),
         Node(
             package='rmf_traffic_ros2',
             executable='rmf_traffic_schedule',
