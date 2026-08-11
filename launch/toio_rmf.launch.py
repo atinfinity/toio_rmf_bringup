@@ -178,6 +178,20 @@ def generate_launch_description():
             # 32 mm square. The nav2 footprint half-diagonal (0.023) makes a
             # sphere noticeably wider than the robot it stands for.
             SetParameter(name='toio_radius', value=0.016),
+            # The schedule visualizer draws the footprint / vicinity of every
+            # robot as a cylinder centred on z=0, 1.0 m and 0.5 m tall by
+            # default. Seen from straight above (TopDownOrtho) those bury the
+            # nav graph under a translucent stack, so keep them flat.
+            SetParameter(name='footprint_height', value=0.01),
+            SetParameter(name='vicinity_height', value=0.005),
+            # Lift the waypoint labels just clear of the robot spheres (which
+            # are centred on z=0, so they reach toio_radius), otherwise a robot
+            # parked on charger_1 / charger_2 hides its label. Seen from
+            # straight above this only decides what is drawn on top, but the
+            # height is real in an orbiting view, so keep it to about the
+            # height of the cube rather than clearing the schedule paths at
+            # z=0.1 as well.
+            SetParameter(name='label_height', value=0.03),
             IncludeLaunchDescription(
                 XMLLaunchDescriptionSource(
                     os.path.join(
@@ -189,19 +203,22 @@ def generate_launch_description():
                     'headless': rmf_headless,
                     # RViz view and marker sizes tuned for the tiny toio
                     # mats (the rmf defaults assume tens-of-meters
-                    # buildings). lane_width is clamped to >= 0.1 in
-                    # rmf_visualization_navgraphs, so the lanes stay 0.1 m
-                    # wide; lower transparency keeps them unobtrusive.
-                    # waypoint_scale/text_scale are multiples of
-                    # lane_width, fleet_state_nose_scale is a multiple of
-                    # the robot radius.
+                    # buildings). lane_width is the unit everything on the
+                    # nav graph is measured in: waypoint_scale and
+                    # text_scale are multiples of it, and so is the offset
+                    # the waypoint labels are drawn at, which is why it has
+                    # to go down to mat scale instead of staying at the
+                    # 0.1 m the rmf visualizers used to clamp it to.
+                    # fleet_state_nose_scale is a multiple of the robot
+                    # radius instead.
                     'viz_config_file':
                         os.path.join(bringup_dir, 'rviz', 'toio_rmf.rviz'),
                     'path_width': '0.01',
-                    'lane_width': '0.1',
+                    'lane_width': '0.01',
                     'lane_transparency': '0.3',
-                    'waypoint_scale': '0.2',
-                    'text_scale': '0.15',
+                    # 0.01 * 2.0 = 20 mm waypoints, 0.01 * 1.5 = 15 mm text
+                    'waypoint_scale': '2.0',
+                    'text_scale': '1.5',
                 }.items()),
         ]),
     ])

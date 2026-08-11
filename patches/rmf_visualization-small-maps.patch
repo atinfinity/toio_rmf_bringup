@@ -1,0 +1,169 @@
+diff --git a/rmf_visualization_navgraphs/src/NavGraphVisualizer.cpp b/rmf_visualization_navgraphs/src/NavGraphVisualizer.cpp
+index f5e38df..03f9de2 100644
+--- a/rmf_visualization_navgraphs/src/NavGraphVisualizer.cpp
++++ b/rmf_visualization_navgraphs/src/NavGraphVisualizer.cpp
+@@ -38,14 +39,16 @@ NavGraphVisualizer::FleetNavGraph::FleetNavGraph(
+   double lane_width_,
+   double waypoint_width_,
+   double text_size_,
+-  double lane_transparency_)
++  double lane_transparency_,
++  double label_height_)
+ : fleet_name(std::move(fleet_name_)),
+   node(node_),
+   color(color_),
+   lane_width(lane_width_),
+   waypoint_width(waypoint_width_),
+   text_size(text_size_),
+-  lane_transparency(lane_transparency_)
++  lane_transparency(lane_transparency_),
++  label_height(label_height_)
+ {
+   traffic_graph = std::nullopt;
+   lane_states = nullptr;
+@@ -143,7 +146,7 @@ void NavGraphVisualizer::FleetNavGraph::initialize_markers(
+       marker.type = marker.TEXT_VIEW_FACING;
+       marker.pose.position.x = loc[0] + this->lane_width * std::cos(0.8509);
+       marker.pose.position.y = loc[1] + this->lane_width * std::sin(0.8509);
+-      marker.pose.position.z = 0.0;
++      marker.pose.position.z = this->label_height;
+       marker.pose.orientation.w = 1.0;
+       marker.scale.z = this->text_size;
+       marker.text = text;
+@@ -381,8 +384,12 @@ NavGraphVisualizer::NavGraphVisualizer(const rclcpp::NodeOptions& options)
+     "Setting parameter initial_map_name to %s", _current_level.c_str());
+ 
+   _lane_width = this->declare_parameter("lane_width", 0.5);
+-  // Set a minimum positive bound to prevent rendering issues
+-  _lane_width = std::max(0.1, _lane_width);
++  // Set a minimum positive bound to prevent rendering issues.
++  // The bound has to stay well below the size of the smallest map in use:
++  // a toio play mat is 0.297 x 0.210 m, and the waypoint label offset below
++  // is one lane_width, so a 0.1 bound would push every label a third of the
++  // map away from its waypoint.
++  _lane_width = std::max(1e-3, _lane_width);
+   RCLCPP_INFO(
+     this->get_logger(),
+     "Setting parameter lane_width to %f", _lane_width);
+@@ -404,6 +411,11 @@ NavGraphVisualizer::NavGraphVisualizer(const rclcpp::NodeOptions& options)
+   _text_scale = this->declare_parameter("text_scale", 1.0);
+   // Set a minimum positive bound to prevent rendering issues
+   _text_scale = std::max(0.1, _text_scale);
++
++  // Draw the waypoint labels above the floor so a robot parked on a waypoint
++  // does not hide its label. 0 keeps them on the floor as before.
++  _label_height = this->declare_parameter("label_height", 0.0);
++  _label_height = std::max(0.0, _label_height);
+   RCLCPP_INFO(
+     this->get_logger(),
+     "Setting parameter text_scale to %f", _text_scale);
+@@ -468,7 +480,8 @@ NavGraphVisualizer::NavGraphVisualizer(const rclcpp::NodeOptions& options)
+           this->_lane_width,
+           this->_lane_width * this->_waypoint_scale,
+           this->_lane_width * this->_text_scale,
+-          this->_lane_transparency
++          this->_lane_transparency,
++          this->_label_height
+         );
+         navgraph->traffic_graph = rmf_traffic_ros2::convert(*msg);
+         if (!navgraph->traffic_graph.has_value())
+@@ -538,7 +551,8 @@ NavGraphVisualizer::NavGraphVisualizer(const rclcpp::NodeOptions& options)
+           this->_lane_width,
+           this->_lane_width * this->_waypoint_scale,
+           this->_lane_width * this->_text_scale,
+-          this->_lane_transparency
++          this->_lane_transparency,
++          this->_label_height
+         );
+         navgraph->lane_states = msg;
+         _navgraphs[msg->fleet_name] = std::move(navgraph);
+diff --git a/rmf_visualization_navgraphs/src/NavGraphVisualizer.hpp b/rmf_visualization_navgraphs/src/NavGraphVisualizer.hpp
+index 47f668b..be34be9 100644
+--- a/rmf_visualization_navgraphs/src/NavGraphVisualizer.hpp
++++ b/rmf_visualization_navgraphs/src/NavGraphVisualizer.hpp
+@@ -79,6 +79,11 @@ private:
+     double waypoint_width;
+     double text_size;
+     double lane_transparency;
++    // Height the waypoint labels are drawn at. Robots are drawn by another
++    // visualizer as spheres sitting on the floor, so a label at floor level
++    // disappears under whichever robot is standing on that waypoint. Under a
++    // top-down orthographic view the height only decides what is drawn on top.
++    double label_height;
+ 
+     std::unordered_set<std::size_t> currently_closed_lanes;
+     std::unordered_set<std::size_t> currently_speed_limited_lanes;
+@@ -90,7 +95,8 @@ private:
+       double lane_width,
+       double waypoint_width,
+       double text_size,
+-      double lane_transparency);
++      double lane_transparency,
++      double label_height);
+ 
+     void initialize_markers(
+       const NavGraph& navgraph,
+@@ -132,6 +138,7 @@ private:
+   double _lane_transparency;
+   double _waypoint_scale;
+   double _text_scale;
++  double _label_height;
+ };
+ 
+ 
+diff --git a/rmf_visualization_schedule/src/ScheduleVisualizer.cpp b/rmf_visualization_schedule/src/ScheduleVisualizer.cpp
+index 961c512..66c9394 100644
+--- a/rmf_visualization_schedule/src/ScheduleVisualizer.cpp
++++ b/rmf_visualization_schedule/src/ScheduleVisualizer.cpp
+@@ -81,7 +82,14 @@ ScheduleVisualizer::ScheduleVisualizer(
+   );
+ 
+   _path_width = this->declare_parameter("path_width", 0.2);
+-  _path_width = std::max(0.1, _path_width);
++  // Keep only a positive bound: a 0.1 m wide path covers half of a toio play
++  // mat (0.297 x 0.210 m), and overlapping paths then composite to opaque
++  _path_width = std::max(1e-3, _path_width);
++
++  _footprint_height = this->declare_parameter("footprint_height", 1.0);
++  _footprint_height = std::max(1e-3, _footprint_height);
++  _vicinity_height = this->declare_parameter("vicinity_height", 0.5);
++  _vicinity_height = std::max(1e-3, _vicinity_height);
+   RCLCPP_INFO(
+     this->get_logger(),
+     "Setting parameter path_width to %f", _path_width
+@@ -353,7 +361,8 @@ auto ScheduleVisualizer::make_footprint_marker(
+     element.description.profile().footprint()->source()).get_radius();
+ 
+   return make_location_marker(element,
+-      param, position, r_footprint, 1.0, 0, make_color(1.0, 1.0, 0, 0.7));
++      param, position, r_footprint, _footprint_height, 0,
++      make_color(1.0, 1.0, 0, 0.7));
+ }
+ 
+ //==============================================================================
+@@ -367,7 +376,8 @@ auto ScheduleVisualizer::make_vicinity_marker(
+     element.description.profile().vicinity()->source()).get_radius();
+ 
+   return make_location_marker(element,
+-      param, position, r_vicinity, 0.5, 1, make_color(0.5, 1.0, 0.9, 0.5));
++      param, position, r_vicinity, _vicinity_height, 1,
++      make_color(0.5, 1.0, 0.9, 0.5));
+ }
+ 
+ //==============================================================================
+diff --git a/rmf_visualization_schedule/src/ScheduleVisualizer.hpp b/rmf_visualization_schedule/src/ScheduleVisualizer.hpp
+index c31f1a7..1dc5f6a 100644
+--- a/rmf_visualization_schedule/src/ScheduleVisualizer.hpp
++++ b/rmf_visualization_schedule/src/ScheduleVisualizer.hpp
+@@ -102,6 +102,11 @@ private:
+   std::vector<Element> _elements;
+   double _rate;
+   double _path_width;
++  // Heights of the footprint / vicinity cylinders. A cylinder is centred on
++  // z = 0, so on a map viewed from straight above (TopDownOrtho) these hide
++  // whatever is drawn below them -- the nav graph among others.
++  double _footprint_height;
++  double _vicinity_height;
+   std::chrono::nanoseconds _timer_period;
+ 
+   rclcpp::TimerBase::SharedPtr _timer;
