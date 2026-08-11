@@ -46,8 +46,12 @@ class MockWorkcell(Node):
         self.result_type = result_type
         self.state_type = state_type
         self.handle_seconds = handle_seconds
-        self._queue = []
-        self._timers = []
+        # request_guid -> hold timer. Doubles as the queue reported in the
+        # state messages (dict order is arrival order). Do not rename this to
+        # _timers: that is an rclpy Node attribute that create_timer appends
+        # every timer to, and clobbering it once made "cancel the oldest
+        # timer" cancel the state timer instead of the hold timer.
+        self._pending = {}
 
         self._result_pub = self.create_publisher(
             result_type, f'/{prefix}_results', 10)
@@ -61,28 +65,24 @@ class MockWorkcell(Node):
     def _on_request(self, msg):
         if msg.target_guid != self.guid:
             return
-        if msg.request_guid in self._queue:
+        if msg.request_guid in self._pending:
             # RMF repeats the request until it sees a result, so a repeat is
             # normal rather than a second job
             return
         self.get_logger().info(f'{self.guid}: request {msg.request_guid}')
-        self._queue.append(msg.request_guid)
-        self._publish_state()
         # A timer, not a sleep: the state has to keep publishing while the
         # request is being "handled", or RMF sees the workcell go silent
-        timer = self.create_timer(
+        self._pending[msg.request_guid] = self.create_timer(
             self.handle_seconds, lambda: self._complete(msg.request_guid))
-        self._timers.append(timer)
+        self._publish_state()
 
     def _complete(self, request_guid):
-        for timer in list(self._timers):
-            if timer.is_canceled():
-                continue
-            timer.cancel()
-            self._timers.remove(timer)
-            break
-        if request_guid in self._queue:
-            self._queue.remove(request_guid)
+        timer = self._pending.pop(request_guid, None)
+        if timer is None:
+            return
+        # create_timer makes periodic timers; destroy this one or it fires
+        # again and publishes the result a second time
+        self.destroy_timer(timer)
         result = self.result_type()
         result.time = self.get_clock().now().to_msg()
         result.request_guid = request_guid
@@ -97,10 +97,10 @@ class MockWorkcell(Node):
         state.time = self.get_clock().now().to_msg()
         state.guid = self.guid
         state.mode = (
-            self.state_type.BUSY if self._queue else self.state_type.IDLE)
-        state.request_guid_queue = list(self._queue)
+            self.state_type.BUSY if self._pending else self.state_type.IDLE)
+        state.request_guid_queue = list(self._pending)
         state.seconds_remaining = float(
-            self.handle_seconds if self._queue else 0.0)
+            self.handle_seconds if self._pending else 0.0)
         self._state_pub.publish(state)
 
 
