@@ -57,8 +57,9 @@ def generate_launch_description():
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='true',
-        description='Use simulation clock (Gazebo) instead of wall clock')
+        default_value='false',
+        description='Use simulation clock (Gazebo) instead of wall clock '
+                    '(set to true together with run_sim for simulation)')
 
     declare_mat_cmd = DeclareLaunchArgument(
         'mat',
@@ -72,8 +73,9 @@ def generate_launch_description():
 
     declare_run_sim_cmd = DeclareLaunchArgument(
         'run_sim',
-        default_value='true',
-        description='Also launch the toio_gazebo multi-robot simulation')
+        default_value='false',
+        description='Also launch the toio_gazebo multi-robot simulation '
+                    '(the default expects the real-robot bridge instead)')
 
     declare_run_nav_cmd = DeclareLaunchArgument(
         'run_nav',

@@ -49,8 +49,8 @@ flowchart TB
   TR --> DESC
 ```
 
-太い矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時
-(`run_sim:=false`)だけ現れる接続を表す。
+太い矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時(既定の
+`run_sim:=false`)だけ現れる接続を表す。
 
 `toio_fleet_adapter` は走行指令をNav2の `NavigateToPose` に委譲する一方、
 ロボットの位置は自分で受け取る。実機では `toio_ros2` の `toio/pose` と
@@ -73,37 +73,57 @@ TF(`map` → ベースフレーム)にフォールバックする。`toio_descri
 ブランチはいずれも各リポジトリのデフォルトブランチで、`setup_environment.sh` が
 そのままcloneする。
 
-## 起動(シミュレーション)
+## 起動
+
+デフォルトは**実機運用**(`use_sim_time:=false` / `run_sim:=false`)。
+シミュレーションで動かす場合は両方を明示的に `true` にする。
+
+### 実機
+
+起動は2段階。**実機ブリッジを先に起動すること** — nav2 の costmap がブリッジ由来の
+TF を待つため、逆順で `initial_transform_timeout` を超えると nav2 が恒久的に
+起動失敗する(詳細と復旧方法は [docs/SETUP.md](docs/SETUP.md) の「起動(2端末)」を参照)。
+
+```bash
+# 端末1: 実機ブリッジ(BLE接続。キューブの電源を入れてから)
+source /opt/ros/jazzy/setup.bash
+source ~/dev_ws/install/setup.bash
+ros2 launch toio_ros2 toio_multi_bringup.launch.py
+
+# 端末2: RMFコア + フリートアダプタ + Nav2 一式
+source /opt/ros/jazzy/setup.bash
+source ~/dev_ws/install/setup.bash
+ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a4
+```
+
+キューブの初期配置(チャージャー頂点への置き方)は
+[docs/SETUP.md](docs/SETUP.md) の「キューブの初期配置」を参照。
+
+### シミュレーション
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 source ~/dev_ws/install/setup.bash
-ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 use_sim_time:=true
+ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 run_sim:=true use_sim_time:=true
 ```
 
-主な引数:
+### 主な引数
 
 | 引数 | デフォルト | 説明 |
 |---|---|---|
 | `mat` | `a3` | 使用マット(`a3` / `a4`) |
-| `use_sim_time` | `true` | シミュレーション時刻を使用 |
-| `run_sim` | `true` | toio_gazeboマルチシミュレーションも起動 |
+| `use_sim_time` | `false` | シミュレーション時刻を使用(シミュレーション時は `true`) |
+| `run_sim` | `false` | toio_gazeboマルチシミュレーションも起動(実機では実機ブリッジを別途起動する) |
 | `run_nav` | `true` | toio_navigation(Nav2)も起動 |
 | `use_nav_rviz` | `false` | ロボット毎のNav2 RVizを起動 |
 | `rmf_headless` | `false` | RMFスケジュールビジュアライザRVizを抑止 |
 | `server_uri` | `''` | rmf-web api-serverのURI(任意) |
 
-実機の場合は `run_sim:=false` とし、別端末で
-`ros2 launch toio_ros2 toio_multi_bringup.launch.py` を起動する。**実機ブリッジを先に
-起動すること** — nav2 の costmap がブリッジ由来の TF を待つため、逆順で
-`initial_transform_timeout` を超えると nav2 が恒久的に起動失敗する
-(詳細と復旧方法は [docs/SETUP.md](docs/SETUP.md) の「起動(2端末)」を参照)。
-
 ## タスク投入例
 
 ```bash
-# patrol: patrol_A → patrol_D を3周
-ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 --use_sim_time
+# patrol: patrol_A → patrol_D を3周(シミュレーション時は --use_sim_time を付ける)
+ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3
 ```
 
 `dispatch_patrol` の引数:
@@ -123,7 +143,7 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 --use_sim_tim
 特定の1台だけを動かす例:
 
 ```bash
-ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 -F toio -R toio1 --use_sim_time
+ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 3 -F toio -R toio1
 ```
 
 delivery タスクも投入できる(pickup / dropoff の荷役要求には launch が起動する
