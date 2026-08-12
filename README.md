@@ -1,5 +1,7 @@
 # toio_rmf_bringup
 
+[![colcon-test](https://github.com/atinfinity/toio_rmf_bringup/actions/workflows/colcon-test.yml/badge.svg)](https://github.com/atinfinity/toio_rmf_bringup/actions/workflows/colcon-test.yml)
+
 Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーション・Nav2を
 1コマンドで一括起動するパッケージ。
 
