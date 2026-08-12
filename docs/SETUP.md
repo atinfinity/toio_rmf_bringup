@@ -65,7 +65,8 @@ colcon build --packages-select rmf_visualization_navgraphs rmf_visualization_sch
 ```bash
 source ~/dev_ws/install/setup.bash
 python3 ~/dev_ws/src/toio_rmf_maps/scripts/verify_alignment.py   # 座標整合(恒等変換)の検証
-ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 use_sim_time:=true
+# 実機なしで確認するのでシミュレーションを明示的に有効化(既定は実機運用)
+ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 run_sim:=true use_sim_time:=true
 # 別端末で
 ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_time
 ```
@@ -157,8 +158,9 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
    # 端末1: 実機ブリッジ(venv内で)。params_fileはデフォルトがA4なので指定不要
    source ~/toio_venv/bin/activate
    ros2 launch toio_ros2 toio_multi_bringup.launch.py cube_ids:=<ID1>,<ID2>
-   # 端末2: RMFコア+アダプタ(シミュレーションなし)。ブリッジが位置を出し始めてから
-   ros2 launch toio_rmf_bringup toio_rmf.launch.py run_sim:=false use_sim_time:=false mat:=a4
+   # 端末2: RMFコア+アダプタ。ブリッジが位置を出し始めてから
+   # (実機運用が既定なので run_sim / use_sim_time の指定は不要)
+   ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a4
    ```
    ※RMF運用時は `enable_goal_pose_motion:=false` をtoio_ros2ノードに設定すること
 

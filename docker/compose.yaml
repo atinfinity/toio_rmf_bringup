@@ -18,8 +18,8 @@ services:
       # ホスト側の ROS 2 環境と一致させる
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
       RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
-      # シミュレーション実行時は true、実機運用時は false
-      USE_SIM_TIME: ${USE_SIM_TIME:-true}
+      # 実機運用時は false(既定)、シミュレーション実行時は true
+      USE_SIM_TIME: ${USE_SIM_TIME:-false}
       # 別マシンのブラウザから開く場合は 0.0.0.0 と実IPを指定する
       RMF_API_SERVER_HOST: ${RMF_API_SERVER_HOST:-127.0.0.1}
       RMF_API_SERVER_PUBLIC_URL: ${RMF_API_SERVER_PUBLIC_URL:-http://localhost:8000}

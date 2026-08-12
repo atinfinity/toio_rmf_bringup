@@ -69,9 +69,12 @@ docker compose logs -f api-server   # 起動確認
 source /opt/ros/jazzy/setup.bash
 source ~/dev_ws/install/setup.bash
 ros2 launch toio_rmf_bringup toio_rmf.launch.py \
-  mat:=a3 use_sim_time:=true \
+  mat:=a4 \
   server_uri:=ws://localhost:8000/_internal
 ```
+
+シミュレーションの場合は `mat:=a3 run_sim:=true use_sim_time:=true` を加え、
+api-server 側も `USE_SIM_TIME=true` で起動する(下記「設定」参照)。
 
 ### 4. ブラウザで開く
 
@@ -87,7 +90,7 @@ Map タブにマットと2台のキューブ、Tasks タブから patrol タス�
 |---|---|---|
 | `ROS_DOMAIN_ID` | `0` | **ホストと一致必須**。ずれるとフリートが見えない |
 | `RMW_IMPLEMENTATION` | `rmw_fastrtps_cpp` | **ホストと一致必須** |
-| `USE_SIM_TIME` | `true` | シミュレーションなら `true`、実機運用なら `false` |
+| `USE_SIM_TIME` | `false` | 実機運用なら `false`(既定)、シミュレーションなら `true` |
 | `RMF_API_SERVER_HOST` | `127.0.0.1` | 別マシンのブラウザから開くなら `0.0.0.0` |
 | `RMF_API_SERVER_PUBLIC_URL` | `http://localhost:8000` | 上記を変えた場合は実IPに合わせる |
 | `RMF_WEB_IMAGE_TAG` | `jazzy-nightly` | api-server イメージのタグ |
@@ -95,10 +98,10 @@ Map タブにマットと2台のキューブ、Tasks タブから patrol タス�
 | `DASHBOARD_ZOOM` | (`main.tsx` の既定 `11`) | マップの初期ズーム |
 | `DASHBOARD_ROBOT_ZOOM` | (`main.tsx` の既定 `13`) | ロボット注目時のズーム |
 
-実機で使う例:
+シミュレーションで使う例:
 
 ```bash
-USE_SIM_TIME=false docker compose up -d
+USE_SIM_TIME=true docker compose up -d
 ```
 
 ズームを変える場合はビルド時の値なので、変更後に再ビルドが必要:
@@ -223,8 +226,8 @@ macOS で監視だけしたい場合の妥協案であって、本来の構成�
 
 **タスクが実行されない / 時刻がおかしい**
 
-シミュレーション実行時は `USE_SIM_TIME=true`(既定)、実機運用時は
-`USE_SIM_TIME=false` にする。ここがずれると api-server が `/clock` を待ち続けたり、
+実機運用時は `USE_SIM_TIME=false`(既定)、シミュレーション実行時は
+`USE_SIM_TIME=true` にする。ここがずれると api-server が `/clock` を待ち続けたり、
 開始時刻が過去や未来にずれたりする。
 
 **ダッシュボードが白画面になる**

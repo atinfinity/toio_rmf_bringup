@@ -28,7 +28,7 @@ here = dirname(__file__)
 # 既定はこの設定ファイルと同じ場所を基準にする
 run_dir = os.environ.get('RMF_API_SERVER_RUN_DIR') or f'{here}/run'
 
-use_sim_time = _flag('USE_SIM_TIME', True)
+use_sim_time = _flag('USE_SIM_TIME', False)
 
 config.update(
     {
