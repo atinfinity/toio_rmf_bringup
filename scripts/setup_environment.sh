@@ -26,8 +26,9 @@
 #   --with-toio-py  install toio.py into a venv (~/toio_venv) for driving
 #                   real cubes over BLE. Requires a Bluetooth adapter.
 #
-# Prerequisites: ROS 2 Jazzy installed under /opt/ros/jazzy, and
-# `gh auth login` completed (toio_rmf_* repositories are private).
+# Prerequisites: ROS 2 Jazzy installed under /opt/ros/jazzy, and the
+# `gh` CLI (used for cloning; authentication is only needed while any
+# of the toio repositories is still private).
 
 set -euo pipefail
 

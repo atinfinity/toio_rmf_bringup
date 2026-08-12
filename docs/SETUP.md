@@ -5,7 +5,7 @@ Ubuntu 24.04 + ROS 2 Jazzy の新規PCで、toioフリートのOpen-RMF環境を
 ## 前提
 
 - ROS 2 Jazzy がインストール済み(`/opt/ros/jazzy`)
-- `gh auth login` 済み(`toio_rmf_maps` / `toio_fleet_adapter` / `toio_rmf_bringup` はprivateのため)
+- `gh` CLI(クイックスタートで `gh repo clone` を使うため。`git clone https://github.com/atinfinity/toio_rmf_bringup` でも可)
 - 実機を使う場合はBluetoothアダプタ必須(シミュレーションのみなら不要)
 
 ## クイックスタート
@@ -25,6 +25,40 @@ bash /tmp/toio_rmf_bringup/scripts/setup_environment.sh            # シミュ�
 5. **colcon build**(rmf_demosのassets/tasks/bridgesはdeb使用のため`--packages-ignore`)
 6. (`--with-toio-py`時)**toio.py** を venv(`~/toio_venv`、`--system-site-packages`)へ導入
    ※Ubuntu 24.04はPEP 668のためシステムpipへの直接インストール不可
+
+## rmf_visualization パッチ(RVizのマットスケール対応)
+
+RMFの可視化ノードは建物スケール前提で、マーカー寸法を `std::max(0.1, ...)` で
+下限クランプしている。0.1 m はA4マット(0.30 x 0.20 m)の幅の3割にあたり、
+
+- waypointラベルが `lane_width` 1つ分(=0.1 m)ずれて描かれる
+- 緑の経路帯が幅0.1 mになり、重なって不透明に塗り潰される
+- footprint / vicinity の円柱(高さ1.0 / 0.5 mハードコード)が真上からの視点で
+  navグラフを覆い隠す
+
+ため、マットスケールでは表示が破綻する。`patches/rmf_visualization-small-maps.patch`
+はこのクランプ下限を `1e-3` に下げ、円柱の高さとラベルの高さをパラメータ化する
+(`footprint_height` / `vicinity_height` / `label_height`。いずれも既定値は従来動作)。
+
+`toio_rmf.launch.py` はこのパッチがある前提の可視化パラメータを渡している。
+パッチ無しでも**走行・交通調停など機能面は一切影響しない**が、クランプが復活して
+`lane_width` が0.1 mに戻ったところへ `waypoint_scale: 2.0` / `text_scale: 1.5` が
+掛かり、waypoint 0.2 m・文字 0.15 mとマットより大きく描かれる。RVizの表示を
+まともに使うにはパッチ適用を推奨する。
+
+適用手順(aptの `ros-jazzy-rmf-visualization` をワークスペースのオーバーレイで上書き):
+
+```bash
+cd ~/dev_ws/src
+git clone --branch 2.3.2 https://github.com/open-rmf/rmf_visualization.git
+cd rmf_visualization
+git apply ~/dev_ws/src/toio_rmf_bringup/patches/rmf_visualization-small-maps.patch
+cd ~/dev_ws
+colcon build --packages-select rmf_visualization_navgraphs rmf_visualization_schedule
+```
+
+パッチは rmf_visualization 2.3.2 で検証済み。既定値を変えない後方互換の変更なので、
+将来的には上流への提案を予定している。
 
 ## 動作確認
 
