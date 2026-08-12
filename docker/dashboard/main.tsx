@@ -97,9 +97,11 @@ export default function App() {
       reportIssueLink="https://github.com/atinfinity/toio_rmf_bringup/issues"
       resources={{ fleets: {}, logos: { header: '/resources/defaultLogo.png' } }}
       tasks={{
-        // フリート側は loop(patrol)と delivery が有効だが、ダッシュボード
-        // からの delivery 投入は未検証のため patrol のみ並べる(docs/TASKS.md)
-        allowedTasks: [{ taskDefinitionId: 'patrol' }],
+        // フリート側の task_capabilities に合わせて patrol と delivery を
+        // 並べる。delivery フォームの pickup/dropoff 選択肢は、ビルディング
+        // マップの pickup_dispenser / dropoff_ingestor vertex params
+        // (toio_rmf_maps 側で patrol_* 頂点に設定)から作られる
+        allowedTasks: [{ taskDefinitionId: 'patrol' }, { taskDefinitionId: 'delivery' }],
         pickupZones: [],
         cartIds: [],
       }}
