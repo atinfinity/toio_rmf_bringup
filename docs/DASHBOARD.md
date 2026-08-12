@@ -118,7 +118,7 @@ DASHBOARD_ZOOM=12 docker compose build dashboard && docker compose up -d
 |---|---|---|
 | `defaultZoom` | `6`(約 64 px/m) | `11`(約 2000 px/m)。A3マットは 0.42 × 0.30 m しかないため |
 | `defaultRobotZoom` | `20` | `13` |
-| `allowedTasks` | patrol / delivery / compose-clean / custom_compose | **patrol のみ**。delivery はフリート側で有効化済みだが、ダッシュボードからの投入は未検証のため並べていない(CLIからの投入は [docs/TASKS.md](TASKS.md) 参照) |
+| `allowedTasks` | patrol / delivery / compose-clean / custom_compose | **patrol / delivery**。delivery フォームの pickup/dropoff 選択肢はビルディングマップの `pickup_dispenser` / `dropoff_ingestor` vertex params(toio_rmf_maps の `patrol_*` 頂点に設定)から作られ、handler には mockワークセル名が自動で入る。sku / quantity はフォーム必須だが mockワークセルは内容を見ないので任意の値でよい |
 | ドア・エレベータのアプリ | あり | 削除。`toio_rmf.launch.py` は door / lift supervisor を起動しない |
 
 ## 確認項目
@@ -306,7 +306,9 @@ Docker Desktop を再起動すると通るようになり、速度も大きく�
 フリート設定(`toio_fleet_config_<mat>.yaml`)の `task_capabilities` で
 有効になっていないタスクは落札されない(現在有効なのは loop と delivery。
 delivery にはRMF本体へのパッチが必要 — [docs/TASKS.md](TASKS.md) 参照)。
-ダッシュボードからの delivery 投入は未検証。
+delivery のフォームが要求する place→handler 対応はビルディングマップの
+vertex params 由来なので、選択肢に出したい waypoint は toio_rmf_maps 側で
+`pickup_dispenser` / `dropoff_ingestor` を持っている必要がある。
 
 ## 関連ドキュメント
 
