@@ -8,6 +8,10 @@ Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーショ�
 **環境構築**(新規PC): [docs/SETUP.md](docs/SETUP.md) 参照。
 `scripts/setup_environment.sh` でapt導入からビルドまで自動化できる。
 
+**Open-RMFのフリート処理を段階的に学びたい方**(ROS 2中級者向け): toio_gazebo
+シミュレーションで入札・交通調停・充電までを手を動かして学ぶチュートリアルを
+[docs/tutorial/](docs/tutorial/README.md) に用意している。
+
 ## 対応環境と関連パッケージ
 
 対応ディストリは **ROS 2 Jazzy(Ubuntu 24.04)のみ**。Open-RMFはJazzyでは
