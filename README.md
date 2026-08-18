@@ -19,42 +19,9 @@ Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーショ�
 バイナリdebが揃っているためソースビルド不要で、toio側の各パッケージのみ
 `~/dev_ws/src` にソースを置いてビルドする。
 
-```mermaid
-flowchart TB
-  subgraph jazzy["Ubuntu 24.04 + ROS 2 Jazzy"]
-    subgraph apt["apt で導入(ros-jazzy-*)"]
-      CORE["Open-RMF コア<br/>rmf_traffic_ros2 / rmf_task_ros2<br/>rmf_building_map_tools / rmf_visualization"]
-      CLI["rmf_demos_tasks<br/>タスク投入 CLI"]
-    end
-    subgraph src["ソースからビルド(~/dev_ws/src)"]
-      BRINGUP["toio_rmf_bringup<br/>本パッケージ"]
-      FA["toio_fleet_adapter"]
-      MAPS["toio_rmf_maps"]
-      NAVI["toio_navigation<br/>Nav2 設定"]
-      GZ["toio_gazebo"]
-      DESC["toio_description"]
-      TR["toio_ros2<br/>実機 BLE ブリッジ"]
-    end
-  end
+![パッケージ構成と接続関係](docs/images/package_relations.svg)
 
-  BRINGUP ==> CORE
-  BRINGUP ==> FA
-  BRINGUP ==> GZ
-  BRINGUP ==> NAVI
-  CLI -->|"タスク投入"| CORE
-  MAPS -->|"建物図"| CORE
-  MAPS -->|"navグラフ"| FA
-  CORE <-->|"入札・タスク割当<br/>FleetState・経路交渉"| FA
-  FA -->|"NavigateToPose"| NAVI
-  NAVI ---|"cmd_vel / TF"| GZ
-  NAVI -.-|"cmd_vel / TF"| TR
-  GZ -->|"TF で位置を報告"| FA
-  TR -.->|"toio/pose・battery_state"| FA
-  GZ --> DESC
-  TR --> DESC
-```
-
-太い矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時(既定の
+太い青矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時(既定の
 `run_sim:=false`)だけ現れる接続を表す。
 
 `toio_fleet_adapter` は走行指令をNav2の `NavigateToPose` に委譲する一方、

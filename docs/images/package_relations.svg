@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 860" width="1240" height="860" role="img" aria-labelledby="t d">
+  <title id="t">パッケージ構成と接続関係</title>
+  <desc id="d">Ubuntu 24.04 + ROS 2 Jazzy 上で、apt で導入する Open-RMF コア・rmf_demos_tasks と、ソースからビルドする toio 系パッケージ(toio_rmf_bringup / toio_fleet_adapter / toio_rmf_maps / toio_navigation / toio_gazebo / toio_description / toio_ros2)の接続関係。太い青矢印は toio_rmf.launch.py が起動するもの、破線は実機運用時のみの接続。</desc>
+  <style>
+    .bg   { fill: #ffffff; }
+    .out  { fill: none; stroke: #b6c2d1; stroke-width: 1.5; }
+    .grp  { fill: #eef2f7; stroke: #b6c2d1; stroke-width: 1.5; }
+    .node { fill: #ffffff; stroke: #8c9bab; stroke-width: 1.5; }
+    .hl   { stroke: #2f6fdb; stroke-width: 2.5; }
+    .lbl  { fill: #1f2328; font-size: 17px; font-weight: 600; }
+    .mut  { fill: #57606a; font-size: 14px; }
+    .ttl  { fill: #57606a; font-size: 15px; font-weight: 600; }
+    .ln   { fill: none; stroke: #57606a; stroke-width: 1.8; }
+    .thk  { fill: none; stroke: #2f6fdb; stroke-width: 4; opacity: 0.85; }
+    .dsh  { stroke-dasharray: 6 5; }
+    .elb  { fill: #24292f; font-size: 15px; paint-order: stroke; stroke: #ffffff; stroke-width: 5px; stroke-linejoin: round; }
+    .amk  { fill: #57606a; }
+    .abk  { fill: #2f6fdb; }
+    text  { font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif; }
+    @media (prefers-color-scheme: dark) {
+      .bg   { fill: #0d1117; }
+      .out  { stroke: #30363d; }
+      .grp  { fill: #161b22; stroke: #30363d; }
+      .node { fill: #21262d; stroke: #6e7681; }
+      .hl   { stroke: #58a6ff; }
+      .lbl  { fill: #e6edf3; }
+      .mut, .ttl { fill: #8b949e; }
+      .ln   { stroke: #8b949e; }
+      .thk  { stroke: #58a6ff; }
+      .elb  { fill: #c9d1d9; stroke: #0d1117; }
+      .amk  { fill: #8b949e; }
+      .abk  { fill: #58a6ff; }
+    }
+  </style>
+  <defs>
+    <marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="amk" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+    <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto-start-reverse">
+      <path class="abk" d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1240" height="860"/>
+
+  <!-- boxes -->
+  <rect class="out" x="15" y="15" width="1210" height="785" rx="8"/>
+  <text class="lbl" x="30" y="42">Ubuntu 24.04 + ROS 2 Jazzy</text>
+  <rect class="grp" x="35" y="60" width="740" height="730" rx="8"/>
+  <text class="ttl" x="50" y="84">ソースからビルド(~/dev_ws/src)</text>
+  <rect class="grp" x="810" y="270" width="395" height="330" rx="8"/>
+  <text class="ttl" x="826" y="294">apt で導入(ros-jazzy-*)</text>
+
+  <!-- edges: thick blue = launched by toio_rmf.launch.py -->
+  <path class="thk" d="M 270 140 C 520 88 1000 96 1130 260 C 1160 330 1150 400 1140 456" marker-end="url(#ab)"/>
+  <path class="thk" d="M 245 176 C 300 230 370 265 422 296" marker-end="url(#ab)"/>
+  <path class="thk" d="M 155 176 C 135 260 150 350 183 420" marker-end="url(#ab)"/>
+  <path class="thk" d="M 95 176 C 52 300 50 480 138 616" marker-end="url(#ab)"/>
+
+  <!-- edges: normal -->
+  <path class="ln" d="M 1007 386 L 1007 458" marker-end="url(#am)"/>
+  <path class="ln" d="M 680 155 C 790 185 848 320 886 458" marker-end="url(#am)"/>
+  <path class="ln" d="M 585 170 C 570 215 545 262 527 296" marker-end="url(#am)"/>
+  <path class="ln" d="M 565 328 C 680 340 780 420 836 490" marker-start="url(#am)" marker-end="url(#am)"/>
+  <path class="ln" d="M 400 340 C 355 372 310 398 266 420" marker-end="url(#am)"/>
+  <path class="ln" d="M 197 476 L 186 618"/>
+  <path class="ln" d="M 230 618 C 290 520 360 420 420 344" marker-end="url(#am)"/>
+  <path class="ln" d="M 205 660 C 235 690 275 706 306 716" marker-end="url(#am)"/>
+  <path class="ln" d="M 535 666 C 505 692 465 706 434 716" marker-end="url(#am)"/>
+
+  <!-- edges: dashed = real-hardware only -->
+  <path class="ln dsh" d="M 305 464 C 365 495 440 565 490 610"/>
+  <path class="ln dsh" d="M 540 612 C 525 520 508 420 498 344" marker-end="url(#am)"/>
+
+  <!-- nodes: source build -->
+  <rect class="node hl" x="70" y="124" width="200" height="52" rx="6"/>
+  <text class="lbl" x="170" y="146" text-anchor="middle">toio_rmf_bringup</text>
+  <text class="mut" x="170" y="168" text-anchor="middle">本パッケージ</text>
+
+  <rect class="node" x="520" y="130" width="160" height="40" rx="6"/>
+  <text class="lbl" x="600" y="156" text-anchor="middle">toio_rmf_maps</text>
+
+  <rect class="node" x="375" y="300" width="190" height="40" rx="6"/>
+  <text class="lbl" x="470" y="326" text-anchor="middle">toio_fleet_adapter</text>
+
+  <rect class="node" x="125" y="424" width="180" height="52" rx="6"/>
+  <text class="lbl" x="215" y="446" text-anchor="middle">toio_navigation</text>
+  <text class="mut" x="215" y="468" text-anchor="middle">Nav2 設定</text>
+
+  <rect class="node" x="115" y="620" width="140" height="40" rx="6"/>
+  <text class="lbl" x="185" y="646" text-anchor="middle">toio_gazebo</text>
+
+  <rect class="node" x="465" y="614" width="190" height="52" rx="6"/>
+  <text class="lbl" x="560" y="636" text-anchor="middle">toio_ros2</text>
+  <text class="mut" x="560" y="658" text-anchor="middle">実機 BLE ブリッジ</text>
+
+  <rect class="node" x="285" y="720" width="170" height="40" rx="6"/>
+  <text class="lbl" x="370" y="746" text-anchor="middle">toio_description</text>
+
+  <!-- nodes: apt -->
+  <rect class="node" x="912" y="334" width="190" height="52" rx="6"/>
+  <text class="lbl" x="1007" y="356" text-anchor="middle">rmf_demos_tasks</text>
+  <text class="mut" x="1007" y="378" text-anchor="middle">タスク投入 CLI</text>
+
+  <rect class="node" x="842" y="462" width="330" height="96" rx="6"/>
+  <text class="lbl" x="1007" y="490" text-anchor="middle">Open-RMF コア</text>
+  <text class="mut" x="1007" y="516" text-anchor="middle">rmf_traffic_ros2 / rmf_task_ros2</text>
+  <text class="mut" x="1007" y="538" text-anchor="middle">rmf_building_map_tools / rmf_visualization</text>
+
+  <!-- edge labels -->
+  <text class="elb" x="1018" y="428">タスク投入</text>
+  <text class="elb" x="812" y="255" text-anchor="middle">建物図</text>
+  <text class="elb" x="562" y="245">navグラフ</text>
+  <text class="elb" x="700" y="382" text-anchor="middle">入札・タスク割当</text>
+  <text class="elb" x="700" y="404" text-anchor="middle">FleetState・経路交渉</text>
+  <text class="elb" x="332" y="390" text-anchor="middle">NavigateToPose</text>
+  <text class="elb" x="192" y="552" text-anchor="middle">cmd_vel / TF</text>
+  <text class="elb" x="400" y="540" text-anchor="middle">cmd_vel / TF</text>
+  <text class="elb" x="385" y="422" text-anchor="middle">TF で位置を報告</text>
+  <text class="elb" x="620" y="478" text-anchor="middle">toio/pose・battery_state</text>
+
+  <!-- legend -->
+  <text class="mut" x="35" y="832">太い青矢印 = toio_rmf.launch.py が起動するもの ・ 破線 = 実機運用時(run_sim:=false)のみの接続</text>
+</svg>
