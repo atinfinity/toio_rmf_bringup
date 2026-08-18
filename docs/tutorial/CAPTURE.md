@@ -13,7 +13,7 @@ sudo apt-get install -y ffmpeg imagemagick scrot xdotool wmctrl fonts-noto-cjk
 - `ffmpeg` … 画面録画(x11grab)とGIF変換
 - `import`(imagemagick)… ウィンドウ単位のスクリーンショット
 - `xdotool` / `wmctrl` … ウィンドウの前面化・座標取得
-- `fonts-noto-cjk` … 端末風PNG(`04_bidding_log.png`)の日本語描画
+- `fonts-noto-cjk` … 端末風PNG(`05_bidding_log.png`)の日本語描画
 
 ## sim起動(録画対象)
 
@@ -51,7 +51,7 @@ ffmpeg -y -f x11grab -framerate 15 -video_size 1852x1024 -i :1.0+81,118 \
 # mp4 -> GIF(パレット生成で発色を良く。横幅は 926 程度に縮小)
 ffmpeg -y -i /tmp/clip.mp4 -vf "fps=10,scale=926:-2:flags=lanczos,palettegen" /tmp/pal.png
 ffmpeg -y -i /tmp/clip.mp4 -i /tmp/pal.png \
-  -lavfi "fps=10,scale=926:-2:flags=lanczos[x];[x][1:v]paletteuse" images/03_patrol.gif
+  -lavfi "fps=10,scale=926:-2:flags=lanczos[x];[x][1:v]paletteuse" images/04_patrol.gif
 ```
 
 動きを確実に写すには「タスク投入 → 数秒待って走り出してから録画開始」。
@@ -83,16 +83,16 @@ A4マットで撮るときは `Scale` を上げ気味に、`X`/`Y` をA4の中�
 |---|---|---|
 | `00_setup_gazebo.png` | Gazebo | 起動直後、2台がチャージャー上の全景 |
 | `00_setup_rviz.png` | RViz | 同上のnavグラフ全景(idle) |
-| `03_patrol_rviz.png` | RViz | patrol投入後、スケジュール経路帯が出た瞬間 |
-| `03_patrol.gif` | RViz | patrol走行を16s録画 |
-| `04_bidding_log.png` | 端末風PNG | `dispatch_patrol` の `-R`有/無 の実出力を並べて描画(`scripts`外の生成物) |
-| `05_traffic_rviz.png` | RViz | 2台に別タスクを投入、経路帯が交錯した瞬間 |
-| `05_traffic.gif` | RViz | 2台の交差を18s録画 |
+| `04_patrol_rviz.png` | RViz | patrol投入後、スケジュール経路帯が出た瞬間 |
+| `04_patrol.gif` | RViz | patrol走行を16s録画 |
+| `05_bidding_log.png` | 端末風PNG | `dispatch_patrol` の `-R`有/無 の実出力を並べて描画(`scripts`外の生成物) |
+| `06_traffic_rviz.png` | RViz | 2台に別タスクを投入、経路帯が交錯した瞬間 |
+| `06_traffic.gif` | RViz | 2台の交差を18s録画 |
 
 ### まだ用意していない(必要なら追加)
 
 - `02_go_to_place.*` … 単一目的地への移動。patrolと絵が近いので未収録
 - `06_battery.*` … シミュレーションのバッテリ残量は推定値でほぼ100%のまま
   変化に乏しい。ChargeBattery発火を撮るには長周回patrolで残量を落とす必要がある
-- `09_dashboard.png` … rmf-webダッシュボード。別途コンテナ起動が要る
+- `10_dashboard.png` … rmf-webダッシュボード。別途コンテナ起動が要る
   ([../DASHBOARD.md](../DASHBOARD.md))

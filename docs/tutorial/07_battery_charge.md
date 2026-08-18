@@ -1,6 +1,6 @@
-# 章6: バッテリと自動充電(ChargeBattery)
+# 章7: バッテリと自動充電(ChargeBattery)
 
-← [前章: 交通調停](05_traffic.md) | [目次](README.md) | 次章: [搬送とワークセル →](07_delivery.md)
+← [前章: 交通調停](06_traffic.md) | [目次](README.md) | 次章: [搬送とワークセル →](08_delivery.md)
 
 ## 狙い
 
@@ -9,7 +9,7 @@
   されるかをフリート設定から理解する
 - 実行中タスクを**キャンセル**する操作を覚える(充電・帰還と絡む)
 
-入札(章4)・交通調停(章5)に続く、フリートの**自己管理**の層。
+入札(章5)・交通調停(章6)に続く、フリートの**自己管理**の層。
 
 ## ChargeBatteryは「投げない」タスク
 
@@ -61,7 +61,7 @@ ros2 topic echo /fleet_states --once
 
 > 実機ではこの値が推定ではなく、キューブ実測(`/toioN/toio/battery_state` の
 > `percentage`、10%刻みの離散値)由来になる。sim/realの差は
-> [章10](10_real_robot.md)で扱う。
+> [章11](11_real_robot.md)で扱う。
 
 ### 2. 長いタスクで充電計画を誘発する
 
@@ -85,7 +85,7 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_B patrol_C patrol_D 
 ### 3. 完了後の自動帰還を見る(finishing_request)
 
 短いpatrolでも、**完了後にチャージャーへ帰る**のは `finishing_request: "charge"`
-の働き。章3で見た「勝手に帰る」挙動の正体がこれ。ChargeBatteryの「途中で
+の働き。章4で見た「勝手に帰る」挙動の正体がこれ。ChargeBatteryの「途中で
 帰る」と、finishing_requestの「終わったら帰る」は別トリガだが、どちらも
 「充電待機へ戻す」点で連続している。
 
@@ -110,7 +110,7 @@ ros2 run rmf_demos_tasks cancel_task -id <task_id>
 - **バッテリ管理はフリートの自律性の要**。入札で「誰が」、交通調停で「どう
   道を分けるか」を見てきたが、ChargeBatteryは**「いつ休むか」を自分で決める**
   層。この3つが揃うと、運用者は個々のロボットの世話をしなくてよくなる。
-- **見積もりにバッテリが入る**ので、章4の入札と繋がっている。残量の少ない
+- **見積もりにバッテリが入る**ので、章5の入札と繋がっている。残量の少ない
   ロボットは「やったら足りなくなる」と見積もられ、入札で不利になったり、
   受注前に充電を挟んだりする。**入札・充電・タスク実行は独立でなく連動**。
 - **finishing_request と ChargeBattery は別物**。前者は「タスク完了後の
@@ -130,4 +130,4 @@ ros2 run rmf_demos_tasks cancel_task -id <task_id>
 自己管理まで見たら、次は「移動」以外のタスク ── **荷役(delivery)**へ。
 ロボットだけでなく**ワークセル**という別の登場人物が出てくる。
 
-← [前章: 交通調停](05_traffic.md) | [目次](README.md) | 次章: [搬送とワークセル →](07_delivery.md)
+← [前章: 交通調停](06_traffic.md) | [目次](README.md) | 次章: [搬送とワークセル →](08_delivery.md)

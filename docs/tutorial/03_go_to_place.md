@@ -1,6 +1,6 @@
-# 章2: 1台を動かす(go_to_place)
+# 章3: 1台を動かす(go_to_place)
 
-← [前章: RMFの全体像](01_architecture.md) | [目次](README.md) | 次章: [巡回と帰還 →](03_patrol.md)
+← [前章: RMFの全体像](02_architecture.md) | [目次](README.md) | 次章: [巡回と帰還 →](04_patrol.md)
 
 ## 狙い
 
@@ -36,9 +36,16 @@ ros2 run rmf_demos_tasks dispatch_go_to_place -p patrol_B -F toio -R toio1 --use
   そのロボットへ直接割り当てる**(RMF内部では `robot_task_request`)
 
 `-F` を付けず `-R` だけ、あるいは両方無しなら、フリート内で**入札**して
-勝った方が動く(→[章4](04_bidding.md))。
+勝った方が動く(→[章5](05_bidding.md))。
 
 ## 観察する
+
+指名した(または落札した)1台が、現在地から目的地の waypoint へ向かい、
+着いたら停止する。緑の帯は `rmf_traffic_schedule` が予約した走行経路(スケジュール)。
+
+![go_to_placeで1台が目的地へ移動](images/03_go_to_place.gif)
+*toio1が `charger_1` から目的地へ向かう様子(toio_gazebo)。着いたらそこで停止し、
+patrolのような巡回・周回はしない。*
 
 ### 1. タスクの一生をログで追う
 
@@ -75,7 +82,7 @@ RMFはキューブの位置をTFから受け取っている(シミュレーシ�
 ros2 run tf2_ros tf2_echo map toio1/base_link
 ```
 
-`map` からの座標が刻々と更新される。この値が `/fleet_states`([章1](01_architecture.md))
+`map` からの座標が刻々と更新される。この値が `/fleet_states`([章2](02_architecture.md))
 のロボット位置と一致しているはず。**「走行指令は下りるが、位置は別経路で
 上がる」**という前章の話が、ここで具体的に確認できる。
 
@@ -83,7 +90,7 @@ ros2 run tf2_ros tf2_echo map toio1/base_link
 
 - **go_to_placeは「移動」だけのタスク**。RMFのタスクは「移動」「荷役」
   「充電」などの**フェーズの列**でできていて、go_to_placeはその最小構成
-  (移動フェーズ1つ)。patrol(章3)やdelivery(章7)は、このフェーズを
+  (移動フェーズ1つ)。patrol(章4)やdelivery(章8)は、このフェーズを
   組み合わせたもの、と捉えると見通しが良い。
 - **走行はNav2に丸投げ**。RMF/アダプタは「どの頂点へ」までを決め、頂点間を
   どう走るか(経路・速度・障害物回避)はNav2の仕事。だから頂点に着けるかは
@@ -104,4 +111,4 @@ ros2 run tf2_ros tf2_echo map toio1/base_link
 
 「1台・1回」が追えたら、次は「巡回」でnavグラフそのものを理解する。
 
-← [前章: RMFの全体像](01_architecture.md) | [目次](README.md) | 次章: [巡回と帰還 →](03_patrol.md)
+← [前章: RMFの全体像](02_architecture.md) | [目次](README.md) | 次章: [巡回と帰還 →](04_patrol.md)

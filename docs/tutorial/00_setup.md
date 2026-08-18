@@ -1,6 +1,6 @@
 # 章0: 環境構築とスモークテスト
 
-← [目次](README.md) | 次章: [RMFの全体像を掴む →](01_architecture.md)
+← [目次](README.md) | 次章: [Open-RMFとは(概要と用語) →](01_overview.md)
 
 ## 狙い
 
@@ -25,8 +25,8 @@ bash /tmp/toio_rmf_bringup/scripts/setup_environment.sh   # シミュレーシ�
 スクリプトは冪等(何度実行してもよい)。Open-RMF一式のapt導入、toio側
 パッケージのclone、rosdep、colcon buildまでを行う。
 
-> このチュートリアルはシミュレーションだけで章9まで進むので、`--with-demos` /
-> `--with-toio-py` は不要。実機の準備は[章10](10_real_robot.md)で行う。
+> このチュートリアルはシミュレーションだけで章10まで進むので、`--with-demos` /
+> `--with-toio-py` は不要。実機の準備は[章11](11_real_robot.md)で行う。
 
 ### 2. RVizの可視化パッチ(推奨)
 
@@ -68,7 +68,7 @@ RVizには同じマットのnavグラフ(頂点とレーン)と2台の位置が�
 *RViz(真上視点)── 6頂点(`charger_1/2`・`patrol_A/B/C/D`)と全レーンの格子、2台のロボット(マゼンタの球)がそれぞれのチャージャー上にいる。*
 
 > **マーカーの意味**(マゼンタの球・オレンジの正方形・緑の帯など)は
-> [章9「マーカーの読み方」](09_visualization.md)に色付きの一覧がある。
+> [章10「マーカーの読み方」](10_visualization.md)に色付きの一覧がある。
 
 - どちらか1台が `patrol_A` → `patrol_D` を2周し、終わると自分のチャージャー
   (`charger_1` / `charger_2`)へ帰還して停止する
@@ -95,10 +95,10 @@ RVizには同じマットのnavグラフ(頂点とレーン)と2台の位置が�
 ## 確認課題
 
 1. 端末Bで `ros2 node list` を実行し、`/toio1` / `/toio2` 名前空間の
-   Nav2ノード群と、RMF側のノードが見えることを確認する(中身は[章1](01_architecture.md)で読む)。
+   Nav2ノード群と、RMF側のノードが見えることを確認する(中身は[章2](02_architecture.md)で読む)。
 2. スモークテストのpatrolが完走し、2台とも自分のチャージャーに戻ったか。
    戻らない場合は端末Aのログにエラーが出ていないか確認する。
 
 うまく1周できたら、次章でこの環境の「地図」を描く。
 
-← [目次](README.md) | 次章: [RMFの全体像を掴む →](01_architecture.md)
+← [目次](README.md) | 次章: [Open-RMFとは(概要と用語) →](01_overview.md)

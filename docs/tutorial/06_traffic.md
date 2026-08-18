@@ -1,6 +1,6 @@
-# 章5: 交通調停(traffic)
+# 章6: 交通調停(traffic)
 
-← [前章: 2台と入札](04_bidding.md) | [目次](README.md) | 次章: [バッテリと自動充電 →](06_battery_charge.md)
+← [前章: 2台と入札](05_bidding.md) | [目次](README.md) | 次章: [バッテリと自動充電 →](07_battery_charge.md)
 
 ## 狙い
 
@@ -54,11 +54,11 @@ ros2 run rmf_demos_tasks dispatch_go_to_place -p charger_1 -F toio -R toio2 --us
 - 接近時、Nav2側で相手を避けて膨らむ動き(局所回避)が見える。A3は格子で
   逃げ道があるので、たいてい別レーンへ回り込む。
 
-![2台の経路が交錯するRViz](images/05_traffic_rviz.png)
+![2台の経路が交錯するRViz](images/06_traffic_rviz.png)
 *2台に別々のタスクを投げた状態。2本の緑の経路帯(スケジュール予約)が格子を
 縫うように引かれ、競合区間で譲り合いが起きる。*
 
-![2台の交差のアニメーション](images/05_traffic.gif)
+![2台の交差のアニメーション](images/06_traffic.gif)
 *2台が格子上を動きながらレーンを分け合う様子(toio_gazebo)。*
 
 ### 実験2: 予約と待ちをログで見る
@@ -72,7 +72,7 @@ ros2 topic echo /fleet_states
 
 一方が `moving`、他方が待ちで速度が落ちる/止まる、という状態変化が
 読める。**「入札で誰がやるか」を決めた後、走行中は交通調停が順番を捌く**
-── 章4との役割の違いがここではっきりする。
+── 章5との役割の違いがここではっきりする。
 
 ### 実験3(任意): 狭いA4で一方通行を体感する
 
@@ -82,6 +82,11 @@ navグラフを**時計回りの一方通行ループ**にしてある。端末A
 ```bash
 ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a4 run_sim:=true use_sim_time:=true
 ```
+
+![A4マットのnavグラフ](../images/navgraph_a4.svg)
+*A3の双方向格子と違い、`approach_1 → patrol_A → approach_2 → patrol_B → approach_1`
+の**時計回り一方通行ループ**。各チャージャーは approach からの双方向スパーの先に
+ぶら下がる。矢印がレーンの向き。*
 
 A4の頂点は `patrol_A` / `patrol_B` / `approach_1` / `approach_2` +
 `charger_1` / `charger_2`(`patrol_C` / `patrol_D` は無い)。patrolを投げると:
@@ -100,7 +105,7 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_B -n 2 --use_sim_tim
 
 ## 理解する
 
-- **交通調停 ≠ 入札**。入札(章4)は「誰がやるか」の意思決定、交通調停は
+- **交通調停 ≠ 入札**。入札(章5)は「誰がやるか」の意思決定、交通調停は
   「走り出した後の道の分け合い」。この2つが揃って初めてマルチロボットが
   成立する。
 - **大域と局所は補い合う**。大域だけだと現場の誤差でぶつかりうるし、局所
@@ -125,9 +130,9 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_B -n 2 --use_sim_tim
    説明できるか。
 3. (発展)A4で2台同時にタスクを投げ、頂点付近の掠りを観察する。物理的な
    狭さと調停の限界を体感したうえで、**なぜ実機検証はA4で1台ずつが基本
-   なのか**([章10](10_real_robot.md))を考える。
+   なのか**([章11](11_real_robot.md))を考える。
 
 道の分け合いまで見たら、次は**バッテリが尽きそうなとき勝手に充電へ帰る**、
 フリートの自律的な自己管理を見る。
 
-← [前章: 2台と入札](04_bidding.md) | [目次](README.md) | 次章: [バッテリと自動充電 →](06_battery_charge.md)
+← [前章: 2台と入札](05_bidding.md) | [目次](README.md) | 次章: [バッテリと自動充電 →](07_battery_charge.md)

@@ -1,6 +1,6 @@
-# 章7: 搬送とワークセル(delivery)
+# 章8: 搬送とワークセル(delivery)
 
-← [前章: バッテリと自動充電](06_battery_charge.md) | [目次](README.md) | 次章: [フリートアクション →](08_fleet_action.md)
+← [前章: バッテリと自動充電](07_battery_charge.md) | [目次](README.md) | 次章: [フリートアクション →](09_fleet_action.md)
 
 ## 狙い
 
@@ -28,7 +28,7 @@
 toioのマットに実際に運べる物は無いので、`toio_rmf.launch.py` が
 **mockワークセル**(`toio_dispenser` / `toio_ingestor`)を起動し、要求に対して
 一定時間後に「完了」を返す(実際には何も運ばない)。これは
-[章1](01_architecture.md)で `ros2 node list` に出ていたノード。
+[章2](02_architecture.md)で `ros2 node list` に出ていたノード。
 
 ## 前提(この章のみ)
 
@@ -40,7 +40,7 @@ toioのマットに実際に運べる物は無いので、`toio_rmf.launch.py` �
 **patrol系が動く環境でも delivery だけは別途この対応が要る**点に注意。
 
 パッチ済み環境が用意できない場合は、この章は「読んで仕組みを理解する」に
-留め、[章8](08_fleet_action.md)へ進んでもよい(章8の perform_action は
+留め、[章9](09_fleet_action.md)へ進んでもよい(章9の perform_action は
 パッチ不要でキューブの荷役演出を単独で試せる)。
 
 ## 動かす
@@ -111,4 +111,4 @@ dropoff はワークセル側で完結し、フリートのアクション(`deli
 荷役の「本物の分担」を見たら、次章では逆に**キューブ自身に演技をさせる**
 フリートアクションを扱う(パッチ不要で試せる)。
 
-← [前章: バッテリと自動充電](06_battery_charge.md) | [目次](README.md) | 次章: [フリートアクション →](08_fleet_action.md)
+← [前章: バッテリと自動充電](07_battery_charge.md) | [目次](README.md) | 次章: [フリートアクション →](09_fleet_action.md)

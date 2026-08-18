@@ -1,6 +1,6 @@
-# 章4: 2台と入札(bidding)
+# 章5: 2台と入札(bidding)
 
-← [前章: 巡回と帰還](03_patrol.md) | [目次](README.md) | 次章: [交通調停 →](05_traffic.md)
+← [前章: 巡回と帰還](04_patrol.md) | [目次](README.md) | 次章: [交通調停 →](06_traffic.md)
 
 ## 狙い
 
@@ -67,7 +67,7 @@ CLIの応答を見ると、指名と入札の違いがはっきり出る。`-R` 
 `robot_task_request` で応答に `assigned_to` がそのまま入り、`-R` 無し(入札)は
 `dispatch_task_request` になってフリートへ入札に回る:
 
-![指名 vs 入札のCLI応答](images/04_bidding_log.png)
+![指名 vs 入札のCLI応答](images/05_bidding_log.png)
 *上: 指名(`robot_task_request` → `assigned_to: toio1`)。下: 入札(`dispatch_task_request` → フリートが落札者を決める)。toio_gazeboでの実出力。*
 
 ### 実験3: 入札の締め切りを見る
@@ -90,12 +90,12 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 run_sim:=true use_sim_ti
 - **タスク割当 = 入札で決まる**。RMFのマルチロボット運用の土台がこれ。
   ロボットを増やしても仕組みは同じで、一番安く実現できる1台が選ばれる。
 - **見積もりの中身**は到達時刻とバッテリ消費。だから入札は「今どこにいるか」
-  「バッテリはどれだけあるか」に影響される ── 章6の充電状態とも絡む
+  「バッテリはどれだけあるか」に影響される ── 章7の充電状態とも絡む
   (バッテリの減ったロボットは不利になりうる)。
 - **指名は入札を上書きする運用の逃げ道**。「この1台を確実に」なら `-F -R`。
   デモや検証で特定の1台を動かしたいときに使う。実機の1台ずつ検証
-  (→[章10](10_real_robot.md))でも重宝する。
-- 落札後にロボットが実際にどう走るかは、ここまでの章2・3のとおり
+  (→[章11](11_real_robot.md))でも重宝する。
+- 落札後にロボットが実際にどう走るかは、ここまでの章3・3のとおり
   (アダプタ→Nav2)。**入札は「走らせる前の意思決定」**で、走り出したら
   次章の交通調停の世界に入る。
 
@@ -115,4 +115,4 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 run_sim:=true use_sim_ti
 「誰がやるか」が決まったら、2台が同時に走り出したとき**道をどう分け合うか**
 ── 交通調停へ進む。
 
-← [前章: 巡回と帰還](03_patrol.md) | [目次](README.md) | 次章: [交通調停 →](05_traffic.md)
+← [前章: 巡回と帰還](04_patrol.md) | [目次](README.md) | 次章: [交通調停 →](06_traffic.md)
