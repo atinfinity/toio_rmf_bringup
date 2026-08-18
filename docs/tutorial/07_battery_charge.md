@@ -51,38 +51,38 @@ stateDiagram-v2
 
 ### 1. バッテリの現在値を見る
 
-シミュレーションでもRMFはバッテリ残量を**推定して**持っている(フリート設定の
-バッテリ消費モデルから計算)。まず現状を見る:
+各ロボットの `battery_percent` は `/fleet_states` に入っている:
 
 ```bash
 ros2 topic echo /fleet_states --once
 ```
 
-各ロボットの `battery_percent`(0.0〜1.0)が入っている。充電待機中は満充電
-付近のはず。
+> [!IMPORTANT]
+> **シミュレーションではこの値は 100% に固定**され、放電も充電もしない。toioの
+> アダプタは実機の `/toioN/toio/battery_state` を残量の入力にしており、sim には
+> それが無いため。フリート設定の `account_for_battery_drain` はタスクの
+> **見積り(入札コスト)**には効くが、**報告される残量そのものは動かない**。
+> 実機ではこの値がキューブの実測(10%刻みの離散値)由来になる
+> (sim/realの差は[章11](11_real_robot.md))。
 
-> 実機ではこの値が推定ではなく、キューブ実測(`/toioN/toio/battery_state` の
-> `percentage`、10%刻みの離散値)由来になる。sim/realの差は
-> [章11](11_real_robot.md)で扱う。
+### 2. ChargeBattery はシミュレーションでは発火しない
 
-### 2. 長いタスクで充電計画を誘発する
+上の状態遷移の「実行中 → 充電帰還」は、残量が `recharge_threshold` を**下回る
+見込み**になると起きる。しかし **sim では残量が 100% に張り付いたまま**なので、
+周回数を増やしても、`recharge_threshold` を上げても、消費電力を上げても、
+**ChargeBattery は発火しない**(このリポジトリで実測確認)。
 
-閾値を割り込ませるには、**バッテリを大きく消費する見込み**のタスクを与える。
-長周回のpatrolが手軽:
+> 実測メモ: patrol を30周させても `battery_percent` は 100.0% のまま。
+> `recharge_threshold` を 0.9 に上げ `ambient_system.power` を100倍にしても、
+> 報告残量が動かない以上 RMF は「下回る見込み」と判断できず充電を挟まない。
+> アダプタのログにも
+> `The current battery percentage is 100.0% ... charging at an average rate of 0.0 %/hour`
+> と出る。
 
-```bash
-ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_B patrol_C patrol_D -n 10 --use_sim_time
-```
-
-**観察**: 周回を重ねるうち、RMFが残量の見込みが `recharge_threshold` を割ると
-判断すると、patrolの合間や完了後に **ChargeBattery** を自動で挟み、自機の
-チャージャーへ帰す。`rmf_task_dispatcher` のログに、投げていないはずの
-充電タスクが現れる。
-
-> 消費モデルの値によっては10周でも閾値に届かないことがある。その場合は
-> 周回数を増やすか、`toio_fleet_config_<mat>.yaml` の `recharge_threshold` を
-> 一時的に大きく(例:0.9)して**わざと発火させて**観察するとよい。設定を
-> 変えたら端末Aを起動し直す。学習のための誘発なので、確認後は元に戻す。
+したがって **ChargeBattery の自動発火は実機で検証する**(キューブの `battery_state`
+が実際に放電する)。手順は[章11](11_real_robot.md)と
+[issue #35](https://github.com/atinfinity/toio_rmf_bringup/issues/35)。sim で確認
+できる充電まわりの挙動は、次の **finishing_request による完了後の帰還**である。
 
 ### 3. 完了後の自動帰還を見る(finishing_request)
 
@@ -121,11 +121,12 @@ ros2 run rmf_demos_tasks cancel_task -id <task_id>
 
 ## 確認課題
 
-1. `/fleet_states` の `battery_percent` を echo し続けながら長いpatrolを投げ、
-   残量が下がっていく様子と、閾値付近でChargeBatteryが挟まる瞬間を捉える。
-2. `recharge_threshold` を一時的に0.9へ上げて発火を確実にし、充電帰還を観察
-   してから元に戻す。**設定値ひとつでフリートの「働き者度」が変わる**ことを
-   体感する。
+1. `/fleet_states` の `battery_percent` を echo し、長いpatrol中も **100% から
+   動かない**ことを確認する(sim の制約。上の「[!IMPORTANT]」の裏取り)。
+   「なぜ sim では ChargeBattery が発火しないか」を自分の言葉で説明できるか。
+2. patrol 完了後、ロボットが `finishing_request: "charge"` で自機のチャージャーへ
+   帰るのを確認する(**これは sim でも動く**充電まわりの挙動)。`finishing_request`
+   を `nothing` に変えて起動し直すと帰らなくなることも試す(確認後は戻す)。
 3. 実行中タスクを `cancel_task` で取り消し、ロボットがチャージャーへ戻る
    ことを確認する。キャンセルと finishing_request の関係を説明できるか。
 
