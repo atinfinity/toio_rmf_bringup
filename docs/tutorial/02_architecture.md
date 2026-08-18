@@ -13,19 +13,19 @@
 toioフリートの環境は、役割の違う3層が重なってできている。上ほど「何をするか」、
 下ほど「どう動かすか」を担当する。
 
+```mermaid
+flowchart TB
+    core["① RMFコア ── 仕事を配る・交通を捌く(誰が・いつ・どこへ)<br/>rmf_task_dispatcher / rmf_traffic_schedule<br/>rmf_traffic_blockade / building_map_server"]
+    fa["② フリートアダプタ ── RMFとロボットの通訳(このロボットで実現する)<br/>toio_fleet_adapter(EasyFullControl)"]
+    robot["③ ロボット層 ── 実際に走らせる(どう走るか)<br/>Nav2 /toio1・/toio2 ＋ Gazebo（または実機）"]
+    core -->|"抽象タスク → NavigateToPose"| fa
+    fa -->|"走行指令 cmd_vel"| robot
+    robot -.->|"位置・バッテリ"| fa
+    fa -.->|"FleetState / TaskState"| core
 ```
-┌─────────────────────────────────────────────┐
-│ ① RMFコア     … 仕事を配る・交通を捌く         │  「誰が・いつ・どこへ」
-│   rmf_task_dispatcher / rmf_traffic_schedule  │
-│   rmf_traffic_blockade / building_map_server  │
-├─────────────────────────────────────────────┤
-│ ② フリートアダプタ … RMFとロボットの通訳       │  「このロボットで実現する」
-│   toio_fleet_adapter (EasyFullControl)        │
-├─────────────────────────────────────────────┤
-│ ③ ロボット層  … 実際に走らせる                 │  「どう走るか」
-│   Nav2 /toio1・/toio2  +  Gazebo(または実機)  │
-└─────────────────────────────────────────────┘
-```
+
+**実線が下向きの指令、破線が上向きの報告**(位置・バッテリは走行指令とは
+別経路で上がる)。
 
 - **① RMFコア**は、ロボットの機種を知らない。「patrol_Aへ行け」「この時刻に
   このレーンを予約する」といった**抽象的な指示**だけを扱う。

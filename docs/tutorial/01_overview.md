@@ -11,7 +11,7 @@
 
 ## Open-RMF とは
 
-**Open-RMF(Robotics Middleware Framework)**は、**複数台・複数メーカーの移動
+**Open-RMF**(Robotics Middleware Framework)は、**複数台・複数メーカーの移動
 ロボットと施設設備(ドア・エレベータ・搬送機)を、同じ空間で協調させる**ための
 オープンソース基盤。ROS 2 の上で動く。
 
@@ -55,7 +55,7 @@ toio は手のひらサイズの1台数千円のキューブ型ロボット。�
 | **交通スケジュール(traffic schedule)** | 各ロボットの走行経路を**時空間で予約**し、かち合いを調整する大域の仕組み(`rmf_traffic_schedule`) | [章6](06_traffic.md) |
 | **交渉(negotiation)** | 予約がかち合ったときに経路を譲り合う調停 | [章6](06_traffic.md) |
 | **参加者(participant)** | 交通スケジュール上の1エージェント(≒1ロボット)。RViz可視化のマーカー名にも出る | [章10](10_visualization.md) |
-| **navグラフ(nav graph)** | ロボットが走れる**頂点(waypoint)とレーン(lane)**の地図。自由空間ではなくこの上を動く | [章4](04_patrol.md) |
+| **navグラフ(nav graph)** | ロボットが走れる**頂点**(waypoint)と**レーン**(lane)の地図。自由空間ではなくこの上を動く | [章4](04_patrol.md) |
 | **waypoint(頂点)** | navグラフの停留点。タスクで指定する `patrol_A` などがこれ | [章4](04_patrol.md) |
 | **lane(レーン)** | 頂点間の通行可能な辺。双方向/一方通行がある | [章4](04_patrol.md) / [章6](06_traffic.md) |
 | **建物図(building map)** | フロア図・navグラフ・設備をまとめたRMFの地図(`building_map_server` が配る) | [章2](02_architecture.md) |

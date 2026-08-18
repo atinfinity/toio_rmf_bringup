@@ -33,14 +33,16 @@
 
 ## 状態遷移で捉える
 
-```
-        タスク受注              残量が閾値を下回る見込み
-  ┌──────────────┐          ┌───────────────────┐
-  ▼              │          ▼                   │
-待機(charger) ─→ 実行中 ─────────────→ 充電帰還(ChargeBattery自動計画)
-  ▲              │  完了時 finishing_request     │
-  │              └──────── charge で帰還 ────────┘
-  └───────────── 自機の charger へ帰り充電待機 ←──┘
+```mermaid
+stateDiagram-v2
+    [*] --> idle
+    idle: 待機（charger で待機・充電）
+    run: 実行中（patrol / delivery などを実行）
+    recharge: 充電帰還（ChargeBattery を自動計画）
+    idle --> run: タスク受注
+    run --> idle: 完了時 finishing_request（charge）で帰還
+    run --> recharge: 残量が recharge_threshold を下回る見込み
+    recharge --> idle: 自機の charger へ帰り充電待機
 ```
 
 図の詳細版は [docs/TASKS.md の ChargeBattery](../TASKS.md) にある。
@@ -108,7 +110,7 @@ ros2 run rmf_demos_tasks cancel_task -id <task_id>
 ## 理解する
 
 - **バッテリ管理はフリートの自律性の要**。入札で「誰が」、交通調停で「どう
-  道を分けるか」を見てきたが、ChargeBatteryは**「いつ休むか」を自分で決める**
+  道を分けるか」を見てきたが、ChargeBatteryは**いつ休むかを自分で決める**
   層。この3つが揃うと、運用者は個々のロボットの世話をしなくてよくなる。
 - **見積もりにバッテリが入る**ので、章5の入札と繋がっている。残量の少ない
   ロボットは「やったら足りなくなる」と見積もられ、入札で不利になったり、
@@ -127,7 +129,7 @@ ros2 run rmf_demos_tasks cancel_task -id <task_id>
 3. 実行中タスクを `cancel_task` で取り消し、ロボットがチャージャーへ戻る
    ことを確認する。キャンセルと finishing_request の関係を説明できるか。
 
-自己管理まで見たら、次は「移動」以外のタスク ── **荷役(delivery)**へ。
+自己管理まで見たら、次は「移動」以外のタスク ── **荷役**(delivery)へ。
 ロボットだけでなく**ワークセル**という別の登場人物が出てくる。
 
 ← [前章: 交通調停](06_traffic.md) | [目次](README.md) | 次章: [搬送とワークセル →](08_delivery.md)
