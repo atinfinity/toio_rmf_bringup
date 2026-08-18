@@ -21,10 +21,8 @@ Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーショ�
 
 ![パッケージ構成と接続関係](docs/images/package_relations.svg)
 
-太い矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時(既定の
+太い青矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時(既定の
 `run_sim:=false`)だけ現れる接続を表す。
-(図の原本は [docs/diagrams/package_relations.mmd](docs/diagrams/package_relations.mmd)。
-編集したら `scripts/render_diagrams.sh` でSVGを再生成する)
 
 `toio_fleet_adapter` は走行指令をNav2の `NavigateToPose` に委譲する一方、
 ロボットの位置は自分で受け取る。実機では `toio_ros2` の `toio/pose` と
