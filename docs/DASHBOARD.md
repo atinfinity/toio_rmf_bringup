@@ -97,6 +97,12 @@ Map タブにマットと2台のキューブ、Tasks タブから patrol タス�
 | `DASHBOARD_PORT` | `3000` | ダッシュボードの待受ポート |
 | `DASHBOARD_ZOOM` | (`main.tsx` の既定 `2000`) | マップの初期ズーム |
 | `DASHBOARD_ROBOT_ZOOM` | (`main.tsx` の既定 `4000`) | ロボット注目時のズーム |
+| `DASHBOARD_API_SERVER_URL` | (`main.tsx` の既定 `http://localhost:8000`) | ブラウザから見た api-server の URL(ビルド時に埋め込み) |
+| `DASHBOARD_TRAJECTORY_SERVER_URL` | (`main.tsx` の既定 `http://localhost:8006`) | 同じくトラジェクトリサーバの URL |
+| `DASHBOARD_ROBOT_RADIUS` などマーカー実寸5変数 | (空 = upstream の既定サイズ) | マーカーの実寸(m)。「床面図がまったく見えない」の節を参照 |
+| `RMF_API_SERVER_PORT` | `8000` | api-server の待受ポート |
+| `RMF_API_SERVER_LOG_LEVEL` | `INFO` | api-server のログレベル |
+| `TZ` | `Asia/Tokyo` | スケジューラのタイムゾーン(システム・UIと揃える) |
 
 シミュレーションで使う例:
 
@@ -232,8 +238,10 @@ macOS で監視だけしたい場合の妥協案であって、本来の構成�
 
 **ダッシュボードが白画面になる**
 
-`RMF_WEB_REF` の既定 `jazzy` でビルドすると、画面が真っ白になり
-コンソールに**メッセージのない `Error`** だけが出る。react-router の invariant で、
+`RMF_WEB_REF` を `jazzy` にしてビルドすると、画面が真っ白になり
+コンソールに**メッセージのない `Error`** だけが出る。**現在の Dockerfile は
+回避のため既定を `c91f0d42` に固定してあるので、既定のままビルドすれば起きない**。
+症状としては react-router の invariant で、
 `<Routes>` が `<Router>` のコンテキスト外だと判定されている
 (本番ビルドはメッセージが削られるため内容が出ない)。
 
@@ -245,7 +253,8 @@ macOS で監視だけしたい場合の妥協案であって、本来の構成�
 - 本リポジトリの `main.tsx` と upstream の `examples/demo/main.tsx` の差分は
   zoom 値・URL・タスク種別・アプリ一覧だけで、レンダー構造は同一
 
-`Update deps (#1083)` (2026-05-08) の直前のリビジョンに固定すると解消する:
+既定の `c91f0d42` は `Update deps (#1083)` (2026-05-08) の直前のリビジョンで、
+明示的に指定してビルドする場合は:
 
 ```bash
 docker build --platform linux/amd64 --build-arg RMF_WEB_REF=c91f0d42 \
@@ -254,7 +263,7 @@ docker build --platform linux/amd64 --build-arg RMF_WEB_REF=c91f0d42 \
 
 macOS + 実機 toio で確認 (2026-08-10)。`jazzy` は `index-DJmLw7mG.js` で白画面、
 `c91f0d42` は `index-CyV80R56.js` で正常描画し、Robots タブに実機のバッテリー
-30% / CHARGING が表示された。upstream が修正されたら既定に戻してよい。
+30% / CHARGING が表示された。upstream が修正されたら既定を `jazzy` に戻してよい。
 
 **マップが点にしか見えない、または見切れる**
 
@@ -262,19 +271,27 @@ macOS + 実機 toio で確認 (2026-08-10)。`jazzy` は `index-DJmLw7mG.js` で
 値を大きくするほど拡大される。
 
 **床面図がまったく見えない場合はズームではなくマーカーのサイズが原因**。
-rmf-dashboard-framework の描画サイズは数十m級の建物向けにハードコードされており、
-toio のマット(A4 で 0.297 x 0.210 m)では床面図を完全に覆い隠す:
+upstream の rmf-dashboard-framework は描画サイズを数十m級の建物向けに
+ハードコードしており、そのままでは toio のマット(A4 で 0.297 x 0.210 m)の
+床面図を完全に覆い隠す:
 
-| 描画物 | 実サイズ | 出典 |
+| 描画物 | upstream の実サイズ | 出典 |
 |---|---|---|
 | waypoint(立方体) | 一辺 **0.65 m**(マット幅の2.2倍) | `shape-three-rendering.tsx` の `boxGeometry [1.3,1.3,1.3]` × `scale 0.5` |
 | waypoint(円) | 半径 **0.3 m** | 同 `Circle args={[0.3, 64]}` |
 | waypoint の高さ | z = **4 m** | 同 `HEIGHT = 8` |
 | ロボット | `DEFAULT_ROBOT_SCALE = 0.003` | `map.tsx`(フリート設定で上書き可) |
 
-いずれもリテラルでパラメータ化されていないため、ダッシュボード側の設定では変えられない。
-**レイヤボタンから `Waypoints` や `Robots` のチェックを外すと床面図が見える**。
-A4 マットで確認済み (2026-08-10)。
+この表のサイズは(`DEFAULT_ROBOT_SCALE` を除き)、本リポジトリの
+`patches/marker-sizes.patch` によってビルド時の `VITE_TOIO_*` 変数で変えられる。
+`.env` で `DASHBOARD_ROBOT_RADIUS` / `DASHBOARD_WAYPOINT_SIZE` /
+`DASHBOARD_WAYPOINT_RADIUS` / `DASHBOARD_MARKER_HEIGHT` / `DASHBOARD_LABEL_SIZE`
+に実寸(m)を設定して再ビルドすると反映される(推奨値は `.env.example` の
+コメントを参照。空のままだと upstream の既定サイズになる)。compose を使わず
+`docker build` で直接ビルドした場合は、Dockerfile の ARG 既定として toio の
+実寸(半径 0.016 m など)が入る。
+設定を変えずに確認だけしたいときは、**レイヤボタンから `Waypoints` や `Robots` の
+チェックを外しても床面図が見える**(A4 マットで確認済み 2026-08-10)。
 
 なお toio の床面図 PNG は 60x40px で、黒いのは外周1pxの枠だけ(内側は完全な白)なので、
 覆い隠すものを消しても見えるのは細い枠線だけになる。見栄えを良くするには
