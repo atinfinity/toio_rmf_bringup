@@ -50,7 +50,10 @@ Visualization Manager:
       Enabled: true
       Name: ScheduleMarkers
       Namespaces:
-        {}
+        participant 0: true
+        participant 1: true
+        participant location 0: false
+        participant location 1: false
       Topic:
         Depth: 5
         Durability Policy: Volatile

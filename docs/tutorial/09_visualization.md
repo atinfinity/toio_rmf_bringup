@@ -37,18 +37,30 @@ navグラフ(オレンジ)= RMFの「地図」([章3](03_patrol.md))、マゼン
 
 | 見た目 | 名前 | 意味 | 出どころ(トピック) |
 |---|---|---|---|
-| **緑の帯** | スケジュール(schedule) | `rmf_traffic_schedule` が予約した**将来の走行経路**。稼働中のロボットにだけ出る。2台が競合するとここで譲り合いが見える([章5](05_traffic.md)) | `/schedule_markers` |
-| **teal(青緑)の半透明の円** | vicinity(周辺域) | 稼働中ロボットの周囲。他機に「近づくな」と示す広めの領域 | `/schedule_markers`(schedule visualizer) |
-| **黄色の半透明の円** | footprint(占有域) | ロボット本体が占める面積。vicinityより内側の小さい円 | `/schedule_markers`(schedule visualizer) |
+| **緑の帯** | スケジュール(schedule) | `rmf_traffic_schedule` が予約した**将来の走行経路**。稼働中のロボットにだけ出る。2台が競合するとここで譲り合いが見える([章5](05_traffic.md)) | `/schedule_markers`(ns `participant N`) |
+| **teal/黄の円**(vicinity / footprint) | 予約軌道上の周辺域・占有域 | **既定では非表示**(下記)。スケジュールが予約した**軌道上の位置**に描かれる ── vicinity=他機への「近づくな」領域、footprint=占有面積 | `/schedule_markers`(ns `participant location N`) |
 
-つまり色で層が分かれている ── **オレンジ=地図(静的)、マゼンタ=ロボット位置、
-緑/teal/黄=いま走っているロボットの予約と占有域(動的)**。「黄色い円が動く=
-ロボットが動いている」であり、その正体はこの footprint マーカーである。
+つまり色で層が分かれている ── **オレンジ=地図(静的)、マゼンタ=ロボットの
+実位置、緑=いま走っているロボットの予約経路(動的)**。
+
+> **なぜ teal/黄(footprint/vicinity)を既定で隠しているか**
+>
+> これらは**スケジュール(=予約)軌道上の位置**に描かれ、**実機(マゼンタ)の
+> 現在位置とは別物**。ロボットが方向転換のたびに一瞬止まる(RPPの
+> `use_rotate_to_heading`)ため予約軌道から遅れては追いつき、その差で teal/黄の
+> 円が前後に**跳ねて見える**(実機自体は滑らか。実測で確認済み)。混乱を避けるため
+> `rviz/toio_rmf.rviz` の `ScheduleMarkers` で namespace `participant location *`
+> を `false` にして**既定で非表示**にしている。緑の予約経路帯(`participant *`)は
+> 残している。
+>
+> **再表示したい場合**: RVizの `ScheduleMarkers` 表示を開き `participant location 0/1`
+> のチェックを入れる(または当該 namespace を `true` にする)。本章の[章3](03_patrol.md)・
+> [章5](05_traffic.md)のスクリーンショットは、説明のためこれらを表示した状態で撮っている。
 
 > toioのマットは数cm〜数十cm。RMFの可視化は数十m級の建物向けに作られている
 > ため、[章0](00_setup.md)で触れたパッチを当てておかないと、この footprint /
-> vicinity が高さ1m級の巨大な円柱になってnavグラフを覆い隠す。パッチの背景は
-> [docs/SETUP.md](../SETUP.md) に詳しい。
+> vicinity が高さ1m級の巨大な円柱になってnavグラフを覆い隠す(表示した場合)。
+> パッチの背景は [docs/SETUP.md](../SETUP.md) に詳しい。
 
 **やってみる**: [章5](05_traffic.md)の2台交差タスクをもう一度投げ、RVizで
 経路帯が2本引かれ、競合区間で片方が待つ/迂回する様子を観察する。CLIログで
