@@ -10,7 +10,8 @@ Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーショ�
 
 **Open-RMFのフリート処理を段階的に学びたい方**(ROS 2中級者向け): toio_gazebo
 シミュレーションで入札・交通調停・充電までを手を動かして学ぶチュートリアルを
-[docs/tutorial/](docs/tutorial/README.md) に用意している。
+別リポジトリ [toio_rmf_tutorial](https://github.com/atinfinity/toio_rmf_tutorial)
+に用意している。
 
 ## 対応環境と関連パッケージ
 
