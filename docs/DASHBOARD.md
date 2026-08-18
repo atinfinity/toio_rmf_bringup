@@ -82,6 +82,11 @@ api-server 側も `USE_SIM_TIME=true` で起動する(下記「設定」参照)�
 
 Map タブにマットと2台のキューブ、Tasks タブから patrol タスクの投入ができる。
 
+![rmf-webダッシュボードのRobotsタブ](tutorial/images/10_dashboard_robots.png)
+*Robots タブ ── `toio1` / `toio2` がフリート `toio` として並び、位置とバッテリ残量が
+更新される(チュートリアル[章10](tutorial/10_visualization.md)と共通の
+スクリーンショット。シミュレーション実行時のため Battery は 100% 固定)。*
+
 ## 設定
 
 `docker compose` は同ディレクトリの `.env` または環境変数を読む。
