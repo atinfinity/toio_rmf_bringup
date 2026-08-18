@@ -1,6 +1,8 @@
 ---
 config:
-  theme: default
+  # defaultテーマはsubgraphが薄黄色になり、GitHubが描画する他のMermaid図と
+  # 色合いが揃わないためneutralにする
+  theme: neutral
   # SafariはSVGを<img>で表示するときforeignObjectを描画しないため、
   # HTMLラベルは無効にする(flowchart側だけでなくトップレベルにも必要)
   htmlLabels: false
