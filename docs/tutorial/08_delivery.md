@@ -65,6 +65,10 @@ ros2 run rmf_demos_tasks dispatch_delivery -p patrol_A -ph toio_dispenser \
 
 ## 観察する
 
+![delivery走行のアニメーション](images/08_delivery.gif)
+*落札したロボットが pickup(`patrol_A`)→ dropoff(`patrol_D`)へ移動する様子
+(toio_gazebo)。各地点でワークセルの処理を待つ間、頂点上で停止して見える。*
+
 タスクは**移動→荷役→移動→荷役**の順で進む:
 
 1. ロボットが `patrol_A`(pickup)へ移動

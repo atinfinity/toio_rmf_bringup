@@ -113,6 +113,12 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py \
   バッテリが更新される([章7](07_battery_charge.md)で見た値がGUIに出る)
 - **Tasks** タブ … patrol / delivery をフォームから投入できる
 
+![rmf-webダッシュボードのRobotsタブ](images/10_dashboard_robots.png)
+*Robotsタブ ── `toio1` / `toio2` がフリート `toio` として並び、Level=L1・
+Battery=100.00%・Status=CHARGING を表示(api-server が `server_uri` の
+WebSocket 経由でフリート状態を受信している)。Battery が 100% 固定なのは
+[章7](07_battery_charge.md)のとおり sim の制約。*
+
 **やってみる**: Tasksタブから patrol を投入し、CLI(`dispatch_patrol`)で
 投げたときと**同じタスクがGUIにも現れる**ことを確認する。CLIとGUIは同じ
 RMFコアに繋がっている ── 入口が違うだけ。
