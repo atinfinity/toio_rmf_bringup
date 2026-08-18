@@ -58,6 +58,15 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
 
 ## 観察する
 
+起動直後の様子(左: Gazebo、右: RViz)。A3マット上に2台のキューブが乗り、
+RVizには同じマットのnavグラフ(頂点とレーン)と2台の位置が描かれる。
+
+![toio_gazebo: A3マット上の2台のキューブ](images/00_setup_gazebo.png)
+*Gazebo ── A3マット(グレー)の上に `toio1` / `toio2` の2台。緑の線は各ロボットのレーザースキャン。*
+
+![RViz: A3マットのnavグラフと2台](images/00_setup_rviz.png)
+*RViz(真上視点)── 6頂点(`charger_1/2`・`patrol_A/B/C/D`)と全レーンの格子、2台のロボット(マゼンタの球)がそれぞれのチャージャー上にいる。*
+
 - どちらか1台が `patrol_A` → `patrol_D` を2周し、終わると自分のチャージャー
   (`charger_1` / `charger_2`)へ帰還して停止する
 - 端末Aのログに `rmf_task_dispatcher` がタスクを受け付け、フリートが入札し、

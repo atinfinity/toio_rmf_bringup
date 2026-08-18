@@ -63,6 +63,13 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_D patrol_B -n 1 -F toio -R to
 BidResponse)が**現れない**ことを確認する ── これが直接割当(`robot_task_request`)。
 「安い方が勝つ」原則を、指名は上書きする。
 
+CLIの応答を見ると、指名と入札の違いがはっきり出る。`-R` 付き(指名)は
+`robot_task_request` で応答に `assigned_to` がそのまま入り、`-R` 無し(入札)は
+`dispatch_task_request` になってフリートへ入札に回る:
+
+![指名 vs 入札のCLI応答](images/04_bidding_log.png)
+*上: 指名(`robot_task_request` → `assigned_to: toio1`)。下: 入札(`dispatch_task_request` → フリートが落札者を決める)。toio_gazeboでの実出力。*
+
 ### 実験3: 入札の締め切りを見る
 
 入札は無限には待たない。`bidding_time_window`(既定 **2.0秒**)の間だけ応答を

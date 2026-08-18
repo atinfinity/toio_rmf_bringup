@@ -54,6 +54,13 @@ ros2 run rmf_demos_tasks dispatch_go_to_place -p charger_1 -F toio -R toio2 --us
 - 接近時、Nav2側で相手を避けて膨らむ動き(局所回避)が見える。A3は格子で
   逃げ道があるので、たいてい別レーンへ回り込む。
 
+![2台の経路が交錯するRViz](images/05_traffic_rviz.png)
+*2台に別々のタスクを投げた状態。2本の緑の経路帯が格子を縫うように引かれ、
+各ロボットの vicinity(teal)が相手との間合いを表す。*
+
+![2台の交差のアニメーション](images/05_traffic.gif)
+*2台が格子上を動きながらレーンを分け合う様子(toio_gazebo)。*
+
 ### 実験2: 予約と待ちをログで見る
 
 大域調停は `rmf_traffic_schedule_primary` が担っている。2台を競合させた
