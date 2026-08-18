@@ -76,7 +76,9 @@ RUN cd /ws \
 # マーカーの実寸を VITE_ 環境変数で上書きできるようにする。upstream は
 # ロボットを半径 0.7m の円、waypoint を一辺 0.65m の立方体で高さ 4m に描く
 # ハードコードで、A4 マット(0.297 x 0.210 m)では床面図が完全に覆われる。
-# 既定値は upstream のままなので、変数を渡さなければ挙動は変わらない。
+# パッチ自体のフォールバックは upstream 値のままで、toio の実寸は上の ARG 既定が
+# 渡す。compose 経由では build.args が空文字で渡るため ARG 既定は使われず、
+# .env で指定しない限り upstream の既定サイズになる。
 COPY patches/marker-sizes.patch /tmp/marker-sizes.patch
 RUN cd /ws && patch -p1 < /tmp/marker-sizes.patch
 

@@ -5,7 +5,7 @@ Ubuntu 24.04 + ROS 2 Jazzy の新規PCで、toioフリートのOpen-RMF環境を
 ## 前提
 
 - ROS 2 Jazzy がインストール済み(`/opt/ros/jazzy`)
-- `gh` CLI(クイックスタートで `gh repo clone` を使うため。`git clone https://github.com/atinfinity/toio_rmf_bringup` でも可)
+- `gh` CLI(`gh auth login` 済み)。`setup_environment.sh` はワークスペースへの各リポジトリの clone すべてに `gh repo clone` を使うため必須
 - 実機を使う場合はBluetoothアダプタ必須(シミュレーションのみなら不要)
 
 ## クイックスタート

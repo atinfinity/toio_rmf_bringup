@@ -22,6 +22,7 @@ services:
       USE_SIM_TIME: ${USE_SIM_TIME:-false}
       # 別マシンのブラウザから開く場合は 0.0.0.0 と実IPを指定する
       RMF_API_SERVER_HOST: ${RMF_API_SERVER_HOST:-127.0.0.1}
+      RMF_API_SERVER_PORT: ${RMF_API_SERVER_PORT:-8000}
       RMF_API_SERVER_PUBLIC_URL: ${RMF_API_SERVER_PUBLIC_URL:-http://localhost:8000}
       RMF_API_SERVER_LOG_LEVEL: ${RMF_API_SERVER_LOG_LEVEL:-INFO}
       TZ: ${TZ:-Asia/Tokyo}

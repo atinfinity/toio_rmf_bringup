@@ -23,8 +23,10 @@ without something answering, a delivery task stalls at the pickup forever.
 
 These nodes answer. They report themselves IDLE, take a request, wait a
 moment so the robot is visibly parked at the waypoint, and report SUCCESS.
-The robot's own pickup / dropoff feedback (LED and chime) comes from
-toio_fleet_adapter, which performs those as actions in the same task.
+A standard delivery task never triggers the robot's own LED / chime
+feedback: toio_fleet_adapter implements those as the fleet actions
+delivery_pickup / delivery_dropoff, which run only through a separate
+perform_action (dispatch_action) task.
 """
 
 import argparse
