@@ -16,6 +16,9 @@ bash /tmp/toio_rmf_bringup/scripts/setup_environment.sh            # シミュ�
 # bash .../setup_environment.sh --with-demos --with-toio-py       # Officeデモ検証・実機も使う場合
 ```
 
+ワークスペースは既定で `~/dev_ws` に作られる。別の場所にしたい場合は
+`--ws <path>` を付ける(このドキュメントの説明はすべて `~/dev_ws` 前提)。
+
 スクリプトは冪等(再実行可)。処理内容:
 
 1. **apt**: `ros-jazzy-rmf-dev` ほかOpen-RMF一式(Jazzyはバイナリdebで完結、ソースビルド不要)、`ros-jazzy-tf-transformations`、(`--with-demos`時)fleet_manager用python依存

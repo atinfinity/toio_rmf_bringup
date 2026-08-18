@@ -119,6 +119,7 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 run_sim:=true use_sim_ti
 | `use_sim_time` | `false` | シミュレーション時刻を使用(シミュレーション時は `true`) |
 | `run_sim` | `false` | toio_gazeboマルチシミュレーションも起動(実機では実機ブリッジを別途起動する) |
 | `run_nav` | `true` | toio_navigation(Nav2)も起動 |
+| `robots` | `toio1,toio2` | Nav2を立てるロボットの名前空間(カンマ区切り、toio_multi_navigationへ渡る)。Gazeboシミュレーションが出すのは固定の toio1 / toio2 |
 | `use_nav_rviz` | `false` | ロボット毎のNav2 RVizを起動 |
 | `rmf_headless` | `false` | RMFスケジュールビジュアライザRVizを抑止 |
 | `server_uri` | `''` | rmf-web api-serverのURI(任意) |

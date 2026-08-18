@@ -22,6 +22,7 @@
 |---|---|---|---|
 | **マゼンタ(紫)の球** | ロボット本体 | フリートが自己申告する各ロボットの現在位置。1台に1つ | `/fleet_markers`(`body`)。半径は `toio_radius`=0.016m |
 | 球から出る**小さな突起** | 機首(nose) | ロボットの**向き** | `/fleet_markers`(`nose`) |
+| ロボット名の文字(**既定で非表示**) | 名前ラベル(name) | 各ロボットの名前。`rviz/toio_rmf.rviz` が namespace `name` をオフにしている。見たい場合は FleetMarkers の `name` にチェックを入れる | `/fleet_markers`(`name`) |
 | **オレンジの正方形** | waypoint(頂点) | navグラフの停留点。タスクで指定する `patrol_A` 等の正体 | `/map_markers`(`toio/waypoints`) |
 | **オレンジの半透明の帯**(格子) | lane(レーン) | 頂点間の通行可能経路。双方向格子 | `/map_markers`(`toio/lanes`) |
 | **オレンジの文字** | ラベル | waypoint名 | `/map_markers`(`toio/labels`) |
