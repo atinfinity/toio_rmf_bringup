@@ -18,13 +18,20 @@
 #
 # Usage:
 #   ./setup_environment.sh [--ws <path>] [--with-demos] [--with-toio-py]
+#                          [--skip-viz-patch]
 #
-#   --ws <path>     workspace root (default: ~/dev_ws)
-#   --with-demos    also set up rmf_demos (Office world) for baseline
-#                   verification: source-clone + partial build + Gazebo
-#                   model symlinks. Not needed to run the toio fleet.
-#   --with-toio-py  install toio.py into a venv (~/toio_venv) for driving
-#                   real cubes over BLE. Requires a Bluetooth adapter.
+#   --ws <path>       workspace root (default: ~/dev_ws)
+#   --with-demos      also set up rmf_demos (Office world) for baseline
+#                     verification: source-clone + partial build + Gazebo
+#                     model symlinks. Not needed to run the toio fleet.
+#   --with-toio-py    install toio.py into a venv (~/toio_venv) for driving
+#                     real cubes over BLE. Requires a Bluetooth adapter.
+#   --skip-viz-patch  do NOT overlay the small-maps-patched rmf_visualization.
+#                     By default the script clones rmf_visualization 2.3.2 and
+#                     applies patches/rmf_visualization-small-maps.patch so RViz
+#                     renders the tiny toio mats correctly (see docs/SETUP.md).
+#                     Skipping keeps the apt rmf_visualization; RViz markers
+#                     then bury the mat, but driving/traffic are unaffected.
 #
 # Prerequisites: ROS 2 Jazzy installed under /opt/ros/jazzy, and the
 # `gh` CLI (used for cloning; authentication is only needed while any
@@ -32,17 +39,24 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 WS="$HOME/dev_ws"
 WITH_DEMOS=0
 WITH_TOIO_PY=0
+SKIP_VIZ_PATCH=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --ws) WS="$2"; shift 2 ;;
     --with-demos) WITH_DEMOS=1; shift ;;
     --with-toio-py) WITH_TOIO_PY=1; shift ;;
+    --skip-viz-patch) SKIP_VIZ_PATCH=1; shift ;;
     *) echo "unknown option: $1"; exit 1 ;;
   esac
 done
+
+VIZ_PATCH="${SCRIPT_DIR}/../patches/rmf_visualization-small-maps.patch"
+RMF_VIZ_TAG="2.3.2"  # tag the small-maps patch is verified against
 
 echo "=== [1/6] Installing Open-RMF and dependencies (apt) ==="
 sudo apt-get update
@@ -80,6 +94,11 @@ clone() {  # clone <repo> [branch]
   fi
   gh repo clone "$repo" -- ${branch:+-b "$branch"}
 }
+# toio_msgs carries the LED/sound/pose message types imported by toio_ros2,
+# toio_gazebo and toio_fleet_adapter; without it the fleet adapter and the
+# Gazebo LED/sound nodes die on `ModuleNotFoundError: No module named
+# 'toio_msgs'`. It is not a released package, so rosdep cannot supply it.
+clone atinfinity/toio_msgs
 clone atinfinity/toio_ros2
 clone atinfinity/toio_navigation
 clone atinfinity/toio_description
@@ -87,6 +106,23 @@ clone atinfinity/toio_gazebo
 clone atinfinity/toio_rmf_maps
 clone atinfinity/toio_fleet_adapter
 clone atinfinity/toio_rmf_bringup
+
+if [[ $SKIP_VIZ_PATCH -eq 0 ]]; then
+  # RViz marker sizes assume tens-of-meters buildings and bury a toio mat, so
+  # overlay rmf_visualization with the small-maps patch (docs/SETUP.md). Pin to
+  # the tag the patch is verified against; only the two patched packages are
+  # built from source later (the rest stay from the debs).
+  if [[ ! -d rmf_visualization ]]; then
+    git clone --branch "$RMF_VIZ_TAG" \
+      https://github.com/open-rmf/rmf_visualization.git
+  fi
+  if git -C rmf_visualization apply --reverse --check "$VIZ_PATCH" 2>/dev/null; then
+    echo "  rmf_visualization: small-maps patch already applied, skipping"
+  else
+    git -C rmf_visualization apply "$VIZ_PATCH"
+    echo "  rmf_visualization: applied small-maps patch"
+  fi
+fi
 
 if [[ $WITH_DEMOS -eq 1 && ! -d rmf_demos ]]; then
   git clone -b jazzy https://github.com/open-rmf/rmf_demos
@@ -97,8 +133,12 @@ if [[ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]]; then
   sudo rosdep init
 fi
 rosdep update
+# The ROS setup files dereference unbound vars (e.g. AMENT_TRACE_SETUP_FILES),
+# which aborts under `set -u`; relax it just for the source.
+set +u
 # shellcheck disable=SC1091
 source /opt/ros/jazzy/setup.bash
+set -u
 rosdep install --from-paths "${WS}/src" --ignore-src -y \
   --skip-keys "rmf_demos_assets rmf_demos_tasks rmf_demos_bridges" || true
 
@@ -121,9 +161,24 @@ echo "=== [5/6] Building the workspace ==="
 cd "${WS}"
 # rmf_demos_assets/tasks/bridges come from debs; building them from
 # source is unnecessary and they are therefore ignored when the
-# rmf_demos sources are present
+# rmf_demos sources are present. The rmf_visualization tree is likewise
+# skipped here and only its two patched packages are built below, so the
+# rest keep coming from the debs.
+VIZ_IGNORE=()
+if [[ $SKIP_VIZ_PATCH -eq 0 ]]; then
+  VIZ_IGNORE=(--packages-ignore-regex 'rmf_visualization.*')
+fi
 colcon build --symlink-install \
-  --packages-ignore rmf_demos_assets rmf_demos_tasks rmf_demos_bridges
+  --packages-ignore rmf_demos_assets rmf_demos_tasks rmf_demos_bridges \
+  "${VIZ_IGNORE[@]}"
+
+if [[ $SKIP_VIZ_PATCH -eq 0 ]]; then
+  echo "=== [5/6] Building patched rmf_visualization overlay ==="
+  # Only the two packages the small-maps patch touches; they link against the
+  # apt-installed rmf_visualization_msgs / rmf_traffic and override the debs.
+  colcon build --symlink-install \
+    --packages-select rmf_visualization_navgraphs rmf_visualization_schedule
+fi
 
 if [[ $WITH_TOIO_PY -eq 1 ]]; then
   echo "=== [6/6] Installing toio.py into ~/toio_venv (for real cubes) ==="

@@ -19,10 +19,10 @@ bash /tmp/toio_rmf_bringup/scripts/setup_environment.sh            # シミュ�
 スクリプトは冪等(再実行可)。処理内容:
 
 1. **apt**: `ros-jazzy-rmf-dev` ほかOpen-RMF一式(Jazzyはバイナリdebで完結、ソースビルド不要)、`ros-jazzy-tf-transformations`、(`--with-demos`時)fleet_manager用python依存
-2. **clone**: toio_ros2 / toio_navigation は `jazzy`(デフォルト)、toio_description / toio_gazebo は `main`、RMF統合3リポジトリ、(`--with-demos`時)rmf_demos `jazzy`
+2. **clone**: `toio_msgs`(LED/音/pose のメッセージ型。fleet_adapter等が依存)、toio_ros2 / toio_navigation は `jazzy`(デフォルト)、toio_description / toio_gazebo は `main`、RMF統合3リポジトリ、(既定)rmf_visualization `2.3.2` を clone して下記パッチを適用、(`--with-demos`時)rmf_demos `jazzy`
 3. **rosdep**: Nav2等の依存解決
 4. (`--with-demos`時)**Gazeboモデルのシンボリックリンク**(下記ハマりどころ①)
-5. **colcon build**(rmf_demosのassets/tasks/bridgesはdeb使用のため`--packages-ignore`)
+5. **colcon build**(rmf_demosのassets/tasks/bridgesはdeb使用のため`--packages-ignore`。パッチ済み `rmf_visualization_navgraphs` / `rmf_visualization_schedule` の2つだけをオーバーレイビルド)
 6. (`--with-toio-py`時)**toio.py** を venv(`~/toio_venv`、`--system-site-packages`)へ導入
    ※Ubuntu 24.04はPEP 668のためシステムpipへの直接インストール不可
 
@@ -46,7 +46,12 @@ RMFの可視化ノードは建物スケール前提で、マーカー寸法を `
 掛かり、waypoint 0.2 m・文字 0.15 mとマットより大きく描かれる。RVizの表示を
 まともに使うにはパッチ適用を推奨する。
 
-適用手順(aptの `ros-jazzy-rmf-visualization` をワークスペースのオーバーレイで上書き):
+`setup_environment.sh` は**このパッチを既定で自動適用する**(clone → `git apply` →
+`rmf_visualization_navgraphs` / `rmf_visualization_schedule` の2つだけをオーバーレイ
+ビルド。冪等)。パッチを当てず素の deb を使いたい場合は `--skip-viz-patch` を付ける。
+
+手動で適用する場合の手順(aptの `ros-jazzy-rmf-visualization` をワークスペースの
+オーバーレイで上書き):
 
 ```bash
 cd ~/dev_ws/src
