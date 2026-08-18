@@ -10,10 +10,11 @@
   ingestor)が担う、という**役割分担**を理解する
 - タスクが「フェーズの列」でできていることを、移動+荷役の組み合わせで見る
 
-> [!WARNING]
-> **この章だけ前提が増える**。素のRMF(aptのdeb)では delivery 開始時に
-> fleet_adapter が異常終了する既知の問題があり、**RMF本体へのパッチが必要**。
-> 下の「前提」を先に確認すること。
+> [!NOTE]
+> delivery は **Ubuntu 24.04 + apt の Open-RMF(本チュートリアルの前提環境)では
+> そのまま動く**(このリポジトリで pickup→dropoff の完走を実測確認)。
+> macOS/RoboStack でソースビルドした RMF では別の既知問題でクラッシュすることが
+> ある(下の「補足: 環境による既知問題」を参照)。
 
 ## ワークセルという登場人物
 
@@ -31,18 +32,20 @@ toioのマットに実際に運べる物は無いので、`toio_rmf.launch.py` �
 一定時間後に「完了」を返す(実際には何も運ばない)。これは
 [章2](02_architecture.md)で `ros2 node list` に出ていたノード。
 
-## 前提(この章のみ)
+## 補足: 環境による既知問題(Ubuntuでは無関係)
 
-**素のRMFでは delivery で fleet_adapter が落ちる**。タスク開始直後に
-`rmf_task_sequence` の型不一致で異常終了する既知の問題があり、RMF本体に
-1行修正のパッチを当てたソースビルドが必要。調査結果と修正は
-[toio_rmf_bringup#20](https://github.com/atinfinity/toio_rmf_bringup/issues/20)
-に記載。patrol / go_to_place / ChargeBattery には影響しないので、
-**patrol系が動く環境でも delivery だけは別途この対応が要る**点に注意。
+**Ubuntu 24.04 + apt の Open-RMF では delivery はそのまま動く。** このリポジトリでの
+実測(toio_gazebo, A3)では、入札 → 落札 → `patrol_A`(dispenser で pickup)→
+`patrol_D`(ingestor で dropoff)→ チャージャー帰還まで、fleet_adapter が
+**クラッシュせず完走**した。
 
-パッチ済み環境が用意できない場合は、この章は「読んで仕組みを理解する」に
-留め、[章9](09_fleet_action.md)へ進んでもよい(章9の perform_action は
-パッチ不要でキューブの荷役演出を単独で試せる)。
+一方 **macOS/RoboStack でソースビルドした RMF** では、delivery 開始時に
+`rmf_task_sequence` の `std::optional<nlohmann::json>` の ABI 不整合で
+fleet_adapter が異常終了する既知の問題がある
+([#20](https://github.com/atinfinity/toio_rmf_bringup/issues/20))。原因は
+ライブラリ間の nlohmann コンパイル定義(`JSON_DIAGNOSTICS` 等)の食い違いで、
+**一貫ビルドされた apt deb では再現しない**。この章は Ubuntu 前提なので、
+通常この問題には遭遇しない。
 
 ## 動かす
 
@@ -110,6 +113,6 @@ dropoff はワークセル側で完結し、フリートのアクション(`deli
    フェーズ)を言葉にする。
 
 荷役の「本物の分担」を見たら、次章では逆に**キューブ自身に演技をさせる**
-フリートアクションを扱う(パッチ不要で試せる)。
+フリートアクションを扱う。
 
 ← [前章: バッテリと自動充電](07_battery_charge.md) | [目次](README.md) | 次章: [フリートアクション →](09_fleet_action.md)
