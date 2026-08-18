@@ -54,8 +54,13 @@ navグラフ(オレンジ)= RMFの「地図」([章3](03_patrol.md))、マゼン
 > 残している。
 >
 > **再表示したい場合**: RVizの `ScheduleMarkers` 表示を開き `participant location 0/1`
-> のチェックを入れる(または当該 namespace を `true` にする)。本章の[章3](03_patrol.md)・
-> [章5](05_traffic.md)のスクリーンショットは、説明のためこれらを表示した状態で撮っている。
+> のチェックを入れる(または当該 namespace を `true` にする)。有効化すると、稼働中の
+> ロボットの周囲に teal(vicinity)と黄(footprint)の円が現れる ↓
+
+![footprint/vicinityを有効化したRViz](images/09_footprint_vicinity.png)
+*参考:`participant location` を表示した状態。2台のロボットに teal の vicinity と
+黄の footprint の円が描かれる(既定ではこれらを非表示にしている。本チュートリアルの
+他のスクリーンショット・動画は既定=非表示で撮影している)。*
 
 > toioのマットは数cm〜数十cm。RMFの可視化は数十m級の建物向けに作られている
 > ため、[章0](00_setup.md)で触れたパッチを当てておかないと、この footprint /

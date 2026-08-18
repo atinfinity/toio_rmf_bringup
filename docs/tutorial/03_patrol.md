@@ -60,11 +60,11 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_B patrol_D patrol_C 
 ## 観察する
 
 patrol実行中のRViz。緑の帯が `rmf_traffic_schedule` に予約された走行経路
-(スケジュール)で、稼働中のロボットには vicinity(teal)と footprint(黄)の
-円が描かれる。navグラフと床面図はそのまま残る。
+(スケジュール)で、稼働中のロボットにだけ出る。navグラフと床面図はそのまま残る。
 
 ![patrol実行中のRViz: スケジュール経路帯](images/03_patrol_rviz.png)
-*緑の帯が予約された経路。toio1が `patrol_B` 付近、toio2は `charger_2` で待機。*
+*緑の帯が予約された経路。toio1が巡回中、toio2は `charger_2` で待機。(スケジュールの
+footprint/vicinity 円は既定で非表示 ── [章9](09_visualization.md)参照)*
 
 ![patrol走行のアニメーション](images/03_patrol.gif)
 *toio1が巡回先を順に訪問していく様子(toio_gazebo)。*

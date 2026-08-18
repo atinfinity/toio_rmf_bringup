@@ -55,8 +55,8 @@ ros2 run rmf_demos_tasks dispatch_go_to_place -p charger_1 -F toio -R toio2 --us
   逃げ道があるので、たいてい別レーンへ回り込む。
 
 ![2台の経路が交錯するRViz](images/05_traffic_rviz.png)
-*2台に別々のタスクを投げた状態。2本の緑の経路帯が格子を縫うように引かれ、
-各ロボットの vicinity(teal)が相手との間合いを表す。*
+*2台に別々のタスクを投げた状態。2本の緑の経路帯(スケジュール予約)が格子を
+縫うように引かれ、競合区間で譲り合いが起きる。*
 
 ![2台の交差のアニメーション](images/05_traffic.gif)
 *2台が格子上を動きながらレーンを分け合う様子(toio_gazebo)。*
