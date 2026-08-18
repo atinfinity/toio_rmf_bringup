@@ -119,11 +119,12 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
    ros2 topic pub -r 10 /toio1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: -0.05}}"
    ```
    RMF運用時は `enable_goal_pose_motion: false` のため `/toioN/goal_pose` は使えない。
-8. **deliveryタスクは素のRMF(aptのdeb)ではfleet_adapterが落ちる**: タスク開始直後に
-   `rmf_task_sequence` の型不一致で異常終了する(調査結果と1行修正は #20)。
-   patrol / go_to_place には影響しない。deliveryを試す場合は #20 のパッチを当てた
-   RMFのソースビルドが必要(mockワークセルを含むdelivery全体の仕組みは
-   [docs/TASKS.md](TASKS.md) 参照)
+8. **deliveryタスクのクラッシュは macOS/RoboStack 固有(Ubuntu apt では無関係)**:
+   macOS/RoboStack のソースビルドRMFでは delivery 開始直後に `rmf_task_sequence` の
+   `nlohmann::json` ABI 不整合で異常終了する(調査は #20)。ただし **Ubuntu 24.04 +
+   apt の Open-RMF では再現せず、delivery はそのまま動く**(toio_gazebo A3 で
+   pickup→dropoff の完走を実測確認)。この環境ではパッチ不要
+   (mockワークセルを含むdelivery全体の仕組みは [docs/TASKS.md](TASKS.md) 参照)
 
 ## 実機検証の手順(フェーズ5残り・A4マット)
 
