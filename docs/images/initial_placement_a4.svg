@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 600" width="760" height="600" role="img" aria-labelledby="t d">
+  <title id="t">キューブの初期配置(A4マット)</title>
+  <desc id="d">0.30 x 0.20 m のA4マット上で、toio1 を charger_1(左端から約5cm・上下中央)、toio2 を charger_2(右端から約5cm・上下中央)に置く。各チャージャーの周りの破線の円は自動マージ範囲(半径 0.06 m)で、この内側ならだいたいの位置でよい。</desc>
+  <style>
+    .bg    { fill: #ffffff; }
+    .mat   { fill: #eef2f7; stroke: #b6c2d1; stroke-width: 2; }
+    .ghost { stroke: #b6c2d1; stroke-width: 4; stroke-linecap: round; fill: none; }
+    .gwp   { fill: none; stroke: #b6c2d1; stroke-width: 3; }
+    .mid   { stroke: #8c9bab; stroke-width: 1.5; stroke-dasharray: 4 6; fill: none; }
+    .rng   { fill: none; stroke: #2f6fdb; stroke-width: 2; stroke-dasharray: 7 6; opacity: 0.6; }
+    .cube  { fill: none; stroke: #2f6fdb; stroke-width: 3.5; }
+    .chg   { fill: #fff4d6; stroke: #d9971a; stroke-width: 4; }
+    .lbl   { fill: #1f2328; font-size: 20px; font-weight: 600; }
+    .mut   { fill: #57606a; font-size: 17px; }
+    .tiny  { fill: #57606a; font-size: 15px; }
+    .warn  { fill: #9a5b00; font-size: 16px; }
+    .bolt  { fill: #d9971a; font-size: 18px; font-weight: 700; }
+    .bar   { stroke: #57606a; stroke-width: 2.5; }
+    text   { font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif; }
+    @media (prefers-color-scheme: dark) {
+      .bg    { fill: #0d1117; }
+      .mat   { fill: #161b22; stroke: #30363d; }
+      .ghost { stroke: #30363d; }
+      .gwp   { stroke: #30363d; }
+      .mid   { stroke: #6e7681; }
+      .rng   { stroke: #58a6ff; }
+      .cube  { stroke: #58a6ff; }
+      .chg   { fill: #3d2f0e; stroke: #d29922; }
+      .lbl   { fill: #e6edf3; }
+      .mut, .tiny { fill: #8b949e; }
+      .warn  { fill: #d29922; }
+      .bolt  { fill: #d29922; }
+      .bar   { stroke: #8b949e; }
+    }
+  </style>
+
+  <rect class="bg" width="760" height="600"/>
+
+  <text class="lbl" x="110" y="40">キューブの初期配置(A4マット)</text>
+  <text class="mut" x="110" y="66">0.30 × 0.20 m / 実機の起動前にこの位置へ置く / 縮尺 0.005 m per px</text>
+
+  <!-- mat: same geometry as navgraph_a4.svg (0.005 m per px, offset 110,80) -->
+  <rect class="mat" x="110" y="80" width="540" height="360" rx="8"/>
+
+  <!-- nav graph shown faintly for orientation only (details in navgraph_a4.svg) -->
+  <g class="ghost">
+    <line x1="302" y1="250" x2="361" y2="203"/>
+    <line x1="399" y1="203" x2="457" y2="250"/>
+    <line x1="457" y1="270" x2="399" y2="317"/>
+    <line x1="361" y1="317" x2="302" y2="270"/>
+    <line x1="222" y1="260" x2="277" y2="260"/>
+    <line x1="483" y1="260" x2="538" y2="260"/>
+  </g>
+  <circle class="gwp" cx="380" cy="188" r="15"/>
+  <text class="tiny" x="380" y="165" text-anchor="middle">patrol_A</text>
+  <circle class="gwp" cx="380" cy="332" r="15"/>
+  <text class="tiny" x="380" y="365" text-anchor="middle">patrol_B</text>
+  <circle class="gwp" cx="290" cy="260" r="9"/>
+  <circle class="gwp" cx="470" cy="260" r="9"/>
+
+  <!-- vertical center of the mat -->
+  <line class="mid" x1="110" y1="260" x2="650" y2="260"/>
+  <text class="tiny" x="380" y="250" text-anchor="middle">上下中央</text>
+
+  <!-- auto-merge range: max_merge_lane_distance 0.06 m = 108 px -->
+  <circle class="rng" cx="200" cy="260" r="108"/>
+  <circle class="rng" cx="560" cy="260" r="108"/>
+
+  <!-- charger waypoints (same positions as navgraph_a4.svg) -->
+  <rect class="chg" x="185" y="245" width="30" height="30" rx="5"/>
+  <text class="bolt" x="200" y="267" text-anchor="middle">⚡</text>
+  <rect class="chg" x="545" y="245" width="30" height="30" rx="5"/>
+  <text class="bolt" x="560" y="267" text-anchor="middle">⚡</text>
+
+  <!-- cubes at their real size: 32 mm = 58 px -->
+  <rect class="cube" x="171" y="231" width="58" height="58" rx="6"/>
+  <text class="lbl" x="200" y="222" text-anchor="middle">toio1</text>
+  <text class="mut" x="200" y="314" text-anchor="middle">charger_1</text>
+
+  <rect class="cube" x="531" y="231" width="58" height="58" rx="6"/>
+  <text class="lbl" x="560" y="222" text-anchor="middle">toio2</text>
+  <text class="mut" x="560" y="314" text-anchor="middle">charger_2</text>
+
+  <!-- distance from the mat edges: 0.05 m = 90 px -->
+  <g class="bar">
+    <line x1="110" y1="118" x2="200" y2="118"/>
+    <line x1="110" y1="111" x2="110" y2="125"/>
+    <line x1="200" y1="111" x2="200" y2="125"/>
+  </g>
+  <text class="mut" x="155" y="106" text-anchor="middle">約 5 cm</text>
+  <g class="bar">
+    <line x1="560" y1="118" x2="650" y2="118"/>
+    <line x1="560" y1="111" x2="560" y2="125"/>
+    <line x1="650" y1="111" x2="650" y2="125"/>
+  </g>
+  <text class="mut" x="605" y="106" text-anchor="middle">約 5 cm</text>
+
+  <!-- notes -->
+  <text class="mut" x="110" y="478">青枠 = キューブの実寸(32 mm 角)、⚡ = チャージャー waypoint</text>
+  <text class="mut" x="110" y="502">薄い線は nav グラフ(向きを合わせる目印)</text>
+  <text class="warn" x="110" y="528">置き方はだいたいで可 ── 破線の円(半径 0.06 m = max_merge_lane_distance)の</text>
+  <text class="warn" x="110" y="552">内側なら自動でマージされる</text>
+
+  <!-- scale bar: 0.1 m = 180 px -->
+  <g class="bar">
+    <line x1="470" y1="570" x2="650" y2="570"/>
+    <line x1="470" y1="563" x2="470" y2="577"/>
+    <line x1="650" y1="563" x2="650" y2="577"/>
+  </g>
+  <text class="tiny" x="560" y="558" text-anchor="middle">0.1 m</text>
+</svg>

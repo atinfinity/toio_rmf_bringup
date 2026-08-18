@@ -155,6 +155,8 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
 - toio1 → charger_1: マット左端から約5cm・上下中央
 - toio2 → charger_2: マット右端から約5cm・上下中央
 
+![キューブの初期配置(A4マット)](images/initial_placement_a4.svg)
+
 ### 起動(2端末)
 
 1. キューブのcube_id確認: 電源を入れ `ros2 run toio_ros2 toio_ros2_node` のログ、
