@@ -83,16 +83,17 @@ A4マットで撮るときは `Scale` を上げ気味に、`X`/`Y` をA4の中�
 |---|---|---|
 | `00_setup_gazebo.png` | Gazebo | 起動直後、2台がチャージャー上の全景 |
 | `00_setup_rviz.png` | RViz | 同上のnavグラフ全景(idle) |
+| `03_go_to_place.gif` | Gazebo | `dispatch_go_to_place` で1台を指名し、目的地に着いて停止するまでを録画 |
 | `04_patrol_rviz.png` | RViz | patrol投入後、スケジュール経路帯が出た瞬間 |
 | `04_patrol.gif` | RViz | patrol走行を16s録画 |
 | `05_bidding_log.png` | 端末風PNG | `dispatch_patrol` の `-R`有/無 の実出力を並べて描画(`scripts`外の生成物) |
 | `06_traffic_rviz.png` | RViz | 2台に別タスクを投入、経路帯が交錯した瞬間 |
 | `06_traffic.gif` | RViz | 2台の交差を18s録画 |
+| `08_delivery.gif` | Gazebo | deliveryを投入し、pickup→dropoffの移動(各地点で約3秒停止)を録画 |
+| `10_footprint_vicinity.png` | RViz | `ScheduleMarkers` の `participant location 0/1` を表示に切り替え、稼働中の円が出た状態 |
+| `10_dashboard_robots.png` | ブラウザ | rmf-webのRobotsタブ。別途コンテナ起動が要る([../DASHBOARD.md](../DASHBOARD.md)) |
 
 ### まだ用意していない(必要なら追加)
 
-- `02_go_to_place.*` … 単一目的地への移動。patrolと絵が近いので未収録
-- `06_battery.*` … シミュレーションのバッテリ残量は推定値でほぼ100%のまま
-  変化に乏しい。ChargeBattery発火を撮るには長周回patrolで残量を落とす必要がある
-- `10_dashboard.png` … rmf-webダッシュボード。別途コンテナ起動が要る
-  ([../DASHBOARD.md](../DASHBOARD.md))
+- `07_battery.*` … シミュレーションでは残量が100%に固定され、ChargeBatteryも
+  発火しない([章7](07_battery_charge.md)で実測確認)。撮るなら実機になる

@@ -89,7 +89,7 @@ FROM docker.io/library/ubuntu:24.04
 
 COPY --from=build /ws/packages/rmf-dashboard-framework/examples/demo/dist /opt/dashboard
 
-# libatomic1 は clean な ubuntu 上で pnpm のバイナリが必要とする
+# pnpm のバイナリの実行には libatomic1 が要る(素の ubuntu には入っていない)
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates curl libatomic1 \
   && rm -rf /var/lib/apt/lists/*

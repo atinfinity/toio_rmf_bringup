@@ -95,8 +95,8 @@ Map タブにマットと2台のキューブ、Tasks タブから patrol タス�
 | `RMF_API_SERVER_PUBLIC_URL` | `http://localhost:8000` | 上記を変えた場合は実IPに合わせる |
 | `RMF_WEB_IMAGE_TAG` | `jazzy-nightly` | api-server イメージのタグ |
 | `DASHBOARD_PORT` | `3000` | ダッシュボードの待受ポート |
-| `DASHBOARD_ZOOM` | (`main.tsx` の既定 `11`) | マップの初期ズーム |
-| `DASHBOARD_ROBOT_ZOOM` | (`main.tsx` の既定 `13`) | ロボット注目時のズーム |
+| `DASHBOARD_ZOOM` | (`main.tsx` の既定 `2000`) | マップの初期ズーム |
+| `DASHBOARD_ROBOT_ZOOM` | (`main.tsx` の既定 `4000`) | ロボット注目時のズーム |
 
 シミュレーションで使う例:
 
@@ -116,8 +116,8 @@ DASHBOARD_ZOOM=12 docker compose build dashboard && docker compose up -d
 
 | 項目 | upstream デモ | toio |
 |---|---|---|
-| `defaultZoom` | `6`(約 64 px/m) | `11`(約 2000 px/m)。A3マットは 0.42 × 0.30 m しかないため |
-| `defaultRobotZoom` | `20` | `13` |
+| `defaultZoom` | `6`(6 px/m) | `2000`(2000 px/m)。A3マットは 0.42 × 0.30 m しかないため |
+| `defaultRobotZoom` | `20` | `4000` |
 | `allowedTasks` | patrol / delivery / compose-clean / custom_compose | **patrol / delivery**。delivery フォームの pickup/dropoff 選択肢はビルディングマップの `pickup_dispenser` / `dropoff_ingestor` vertex params(toio_rmf_maps の `patrol_*` 頂点に設定)から作られ、handler には mockワークセル名が自動で入る。sku / quantity はフォーム必須だが mockワークセルは内容を見ないので任意の値でよい |
 | ドア・エレベータのアプリ | あり | 削除。`toio_rmf.launch.py` は door / lift supervisor を起動しない |
 
@@ -258,8 +258,8 @@ macOS + 実機 toio で確認 (2026-08-10)。`jazzy` は `index-DJmLw7mG.js` で
 
 **マップが点にしか見えない、または見切れる**
 
-`DASHBOARD_ZOOM` を調整して再ビルドする。ズームは `2^z` ピクセル毎メートル相当で、
-値を1増やすと2倍に拡大される。
+`DASHBOARD_ZOOM` を調整して再ビルドする。ズームは「1メートルあたりのピクセル数」(線形)で、
+値を大きくするほど拡大される。
 
 **床面図がまったく見えない場合はズームではなくマーカーのサイズが原因**。
 rmf-dashboard-framework の描画サイズは数十m級の建物向けにハードコードされており、

@@ -82,7 +82,7 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a4 run_sim:=true use_sim_ti
 
 ![A4マットのnavグラフ](../images/navgraph_a4.svg)
 *A3の双方向格子と違い、`approach_1 → patrol_A → approach_2 → patrol_B → approach_1`
-の**時計回り一方通行ループ**。各チャージャーは approach からの双方向スパーの先に
+の**時計回り一方通行ループ**。各チャージャーは approach から伸びる双方向の支線の先に
 ぶら下がる。矢印がレーンの向き。*
 
 A4の頂点は `patrol_A` / `patrol_B` / `approach_1` / `approach_2` +

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 630" width="760" height="630" role="img" aria-labelledby="t d">
-  <title id="t">A4マットのnavグラフ(一方通行ループ+チャージャースパー)</title>
-  <desc id="d">0.30 x 0.20 m のA4マット上に配置された6頂点(charger_1, approach_1, patrol_A, approach_2, patrol_B, charger_2)。approach_1 から patrol_A、approach_2、patrol_B を経て approach_1 に戻る時計回りの一方通行ループと、各チャージャーを approach に結ぶ双方向スパー。</desc>
+  <title id="t">A4マットのnavグラフ(一方通行ループ+チャージャーへの支線)</title>
+  <desc id="d">0.30 x 0.20 m のA4マット上に配置された6頂点(charger_1, approach_1, patrol_A, approach_2, patrol_B, charger_2)。approach_1 から patrol_A、approach_2、patrol_B を経て approach_1 に戻る時計回りの一方通行ループと、各チャージャーを approach に結ぶ双方向の支線。</desc>
   <style>
     .bg   { fill: #ffffff; }
     .mat  { fill: #eef2f7; stroke: #b6c2d1; stroke-width: 2; }
@@ -32,7 +32,7 @@
 
   <rect class="bg" width="760" height="630"/>
 
-  <text class="lbl" x="110" y="40">A4マット nav グラフ(一方通行ループ+チャージャースパー)</text>
+  <text class="lbl" x="110" y="40">A4マット nav グラフ(一方通行ループ+チャージャーへの支線)</text>
   <text class="mut" x="110" y="66">0.30 × 0.20 m / patrol_C・patrol_D は存在しない / 縮尺 0.005 m per px</text>
 
   <!-- mat: building.yaml pixel (0,0)-(60,40) at 9 svg px per map px, offset (110,80) -->
@@ -92,9 +92,9 @@
 
   <!-- notes -->
   <text class="mut" x="110" y="478">通行方向:approach_1 → patrol_A → approach_2 → patrol_B → approach_1</text>
-  <text class="mut" x="110" y="502">チャージャーは approach からの双方向スパーの先(dock_name 付きで到着時に精密停止)</text>
-  <text class="warn" x="110" y="528">双方向レーンでは最接近 19.9 mm &lt; キューブ幅 32 mm となるため、ループの対向流は</text>
-  <text class="warn" x="110" y="552">通行方向で分離している(スパーは充電の出入り専用なので双方向でよい)</text>
+  <text class="mut" x="110" y="502">チャージャーは approach からの双方向の支線の先(dock_name 付きで到着時に精密停止)</text>
+  <text class="warn" x="110" y="528">双方向レーンでは最接近 19.9 mm &lt; キューブ幅 32 mm となるため、ループ上のすれ違いは</text>
+  <text class="warn" x="110" y="552">一方通行にして避けている(支線は充電の出入り専用なので双方向でよい)</text>
   <text class="warn" x="110" y="576">patrol_B → patrol_A はループを一周して到達する</text>
 
   <!-- scale bar: 0.1 m = 20 map px = 180 svg px -->
