@@ -53,7 +53,7 @@ TF(`map` → ベースフレーム)にフォールバックする。`toio_descri
 ### 実機
 
 起動は2段階。**実機ブリッジを先に起動すること**。nav2 の costmap はブリッジ由来の
-TFを待つため、順序を逆にして `initial_transform_timeout` を超えると、nav2 が
+TFを待つため、逆順で `initial_transform_timeout` を超えると、nav2 が
 恒久的に起動失敗する(詳細と復旧方法は [docs/SETUP.md](docs/SETUP.md) の「起動(2端末)」を参照)。
 
 ```bash
