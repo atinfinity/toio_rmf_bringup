@@ -54,6 +54,7 @@ def generate_launch_description():
     bidding_time_window = LaunchConfiguration('bidding_time_window')
     robots = LaunchConfiguration('robots')
     peer_footprint_size = LaunchConfiguration('peer_footprint_size')
+    use_velocity_smoother = LaunchConfiguration('use_velocity_smoother')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
@@ -118,6 +119,13 @@ def generate_launch_description():
                     '0.10 blocks the corridors entirely (planner '
                     'deadlock), so auto uses 0.06 there, which is safe in '
                     'combination with its one-way nav graph')
+
+    declare_use_velocity_smoother_cmd = DeclareLaunchArgument(
+        'use_velocity_smoother',
+        default_value='True',
+        description='Run velocity_smoother for every robot (smooths the '
+                    'controller cmd_vel). One extra node per robot; set False '
+                    'to save processes in large fleets')
 
     building_yaml = [
         maps_dir, '/maps/toio_', mat, '/toio_', mat, '.building.yaml']
@@ -269,6 +277,7 @@ def generate_launch_description():
                 ["'", peer_footprint_size, "' if '", peer_footprint_size,
                  "' != 'auto' else ('0.10' if '", mat,
                  "' == 'a3' else '0.06')"]),
+            'use_velocity_smoother': use_velocity_smoother,
         }.items())
 
     ld = LaunchDescription()
@@ -282,6 +291,7 @@ def generate_launch_description():
     ld.add_action(declare_bidding_time_window_cmd)
     ld.add_action(declare_robots_cmd)
     ld.add_action(declare_peer_footprint_size_cmd)
+    ld.add_action(declare_use_velocity_smoother_cmd)
     ld.add_action(rmf_core)
     ld.add_action(fleet_adapter)
     ld.add_action(simulation)
