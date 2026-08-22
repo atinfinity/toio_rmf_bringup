@@ -18,6 +18,8 @@
   <exec_depend>rmf_visualization</exec_depend>
   <exec_depend>toio_rmf_maps</exec_depend>
   <exec_depend>toio_fleet_adapter</exec_depend>
+  <exec_depend>toio_gazebo</exec_depend>
+  <exec_depend>toio_navigation</exec_depend>
 
   <exec_depend>rmf_dispenser_msgs</exec_depend>
   <exec_depend>rmf_ingestor_msgs</exec_depend>
