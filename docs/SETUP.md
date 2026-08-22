@@ -121,7 +121,7 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
    ```bash
    ros2 topic pub -r 10 /toio1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: -0.05}}"
    ```
-   RMF運用時は `enable_goal_pose_motion: false` のため `/toioN/goal_pose` は使えない。
+   `enable_goal_pose_motion` は既定で false なので `/toioN/goal_pose` は使えない(キューブ内蔵の目標移動は RMF の経路と競合するため)。
 8. **deliveryタスクのクラッシュは macOS/RoboStack 固有(Ubuntu apt では無関係)**:
    macOS/RoboStack のソースビルドRMFでは delivery 開始直後に `rmf_task_sequence` の
    `nlohmann::json` ABI 不整合で異常終了する(調査は #20)。ただし **Ubuntu 24.04 +
@@ -173,7 +173,7 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
    # (実機運用が既定なので run_sim / use_sim_time の指定は不要)
    ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a4
    ```
-   ※RMF運用時は `enable_goal_pose_motion:=false` をtoio_ros2ノードに設定すること
+   ※`enable_goal_pose_motion` は toio_ros2 で既定 false(内蔵の目標移動は無効)。RMF 運用では true にしないこと
 
    > **注意: 逆順にすると nav2 が恒久的に起動失敗する**
    >
