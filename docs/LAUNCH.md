@@ -9,9 +9,9 @@
 
 ### 実機
 
-起動は2段階。**実機ブリッジを先に起動すること** — nav2 の costmap がブリッジ由来の
-TF を待つため、逆順で `initial_transform_timeout` を超えると nav2 が恒久的に
-起動失敗する(詳細と復旧方法は [SETUP.md](SETUP.md) の「起動(2端末)」を参照)。
+起動は2段階。**実機ブリッジを先に起動すること**。nav2 の costmap はブリッジ由来の
+TFを待つため、逆順で `initial_transform_timeout` を超えると、nav2 が
+恒久的に起動失敗する(詳細と復旧方法は [SETUP.md](SETUP.md) の「起動(2端末)」を参照)。
 
 ```bash
 # 端末1: 実機ブリッジ(BLE接続。キューブの電源を入れてから)
@@ -42,7 +42,7 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 run_sim:=true use_sim_ti
 |---|---|---|
 | `mat` | `a3` | 使用マット(`a3` / `a4`) |
 | `use_sim_time` | `false` | シミュレーション時刻を使用(シミュレーション時は `true`) |
-| `run_sim` | `false` | toio_gazeboマルチシミュレーションも起動(実機では実機ブリッジを別途起動する) |
+| `run_sim` | `false` | toio_gazeboマルチシミュレーションも起動(実機運用では別途ブリッジを起動する) |
 | `run_nav` | `true` | toio_navigation(Nav2)も起動 |
 | `robots` | `toio1,toio2` | Nav2を立てるロボットの名前空間(カンマ区切り、toio_multi_navigationへ渡る)。Gazeboシミュレーションが出すのは固定の toio1 / toio2 |
 | `use_nav_rviz` | `false` | ロボット毎のNav2 RVizを起動 |
