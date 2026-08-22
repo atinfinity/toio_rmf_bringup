@@ -14,7 +14,7 @@ source ~/dev_ws/install/setup.bash
 
 タスクはCLIから `rmf_task_dispatcher` に投げられ、フリートの入札を経て
 `toio_fleet_adapter` が落札する。アダプタは名前空間付きの `NavigateToPose`
-アクションでNav2に走行を委譲し、実際にキューブを動かすのはNav2である。
+アクションでNav2に走行を委譲する。実際にキューブを動かすのはNav2である。
 
 ```mermaid
 flowchart LR
@@ -77,7 +77,7 @@ A3=0.10 / A4=0.06 が自動設定される)。
 
 ![A4マットのnavグラフ](images/navgraph_a4.svg)
 
-一方通行にしているのはマットが狭いためで、詳細は [README](../README.md) の
+一方通行にしているのはマットが狭いため。詳細は [README](../README.md) の
 「A4での2台同時運用の注意」を参照。チャージャーをループ上ではなく支線の先に
 置いているのは、単に通過するだけのロボットが駐機中のロボットに突っ込まないため。
 A4のチャージャー頂点には `dock_name` が設定されており、到着の最終区間は Dock

@@ -5,7 +5,7 @@ Ubuntu 24.04 + ROS 2 Jazzy の新規PCで、toioフリートのOpen-RMF環境を
 ## 前提
 
 - ROS 2 Jazzy がインストール済み(`/opt/ros/jazzy`)
-- `gh` CLI(`gh auth login` 済み)。`setup_environment.sh` はワークスペースへの各リポジトリの clone すべてに `gh repo clone` を使うため必須
+- `gh` CLI(`gh auth login` 済み)。`setup_environment.sh` はワークスペースへの全リポジトリのcloneに `gh repo clone` を使うため必須
 - 実機を使う場合はBluetoothアダプタ必須(シミュレーションのみなら不要)
 
 ## クイックスタート
@@ -34,7 +34,7 @@ bash /tmp/toio_rmf_bringup/scripts/setup_environment.sh            # シミュ�
 RMFの可視化ノードは建物スケール前提で、マーカー寸法を `std::max(0.1, ...)` で
 下限クランプしている。0.1 m はA4マット(0.30 x 0.20 m)の幅の3割にあたり、
 
-- waypointラベルが `lane_width` 1つ分(=0.1 m)ずれて描かれる
+- waypointラベルが `lane_width` 1つ分(0.1 m)ずれて描かれる
 - 緑の経路帯が幅0.1 mになり、重なって不透明に塗り潰される
 - footprint / vicinity の円柱(高さ1.0 / 0.5 mハードコード)が真上からの視点で
   navグラフを覆い隠す
@@ -49,9 +49,9 @@ RMFの可視化ノードは建物スケール前提で、マーカー寸法を `
 掛かり、waypoint 0.2 m・文字 0.15 mとマットより大きく描かれる。RVizの表示を
 まともに使うにはパッチ適用を推奨する。
 
-`setup_environment.sh` は**このパッチを既定で自動適用する**(clone → `git apply` →
-`rmf_visualization_navgraphs` / `rmf_visualization_schedule` の2つだけをオーバーレイ
-ビルド。冪等)。パッチを当てず素の deb を使いたい場合は `--skip-viz-patch` を付ける。
+`setup_environment.sh` は**このパッチを既定で自動適用する**(cloneして `git apply` を
+実行し、`rmf_visualization_navgraphs` / `rmf_visualization_schedule` の2つだけを
+オーバーレイビルドする。冪等)。パッチを当てず素の deb を使いたい場合は `--skip-viz-patch` を付ける。
 
 手動で適用する場合の手順(aptの `ros-jazzy-rmf-visualization` をワークスペースの
 オーバーレイで上書き):
@@ -136,14 +136,14 @@ ros2 run rmf_demos_tasks dispatch_patrol -p patrol_A patrol_D -n 2 --use_sim_tim
 - **toio_rmf_mapsがmainでビルド済み**であること(A4は一方通行化 #1 に加え、
   #6 でチャージャーがループから外れて支線の先へ移された)
 - A4のnavグラフ: `approach_1 → patrol_A → approach_2 → patrol_B → approach_1` の
-  **時計回りの一方通行ループ**(各0.064m)+ 各チャージャーは approach からの
-  短い**双方向の支線**の先(`dock_name` 付き)。タスクの目的地に使うのは
+  **時計回りの一方通行ループ**(各0.064m)に加え、各チャージャーは approach からの
+  短い**双方向の支線**の先にある(`dock_name` 付き)。タスクの目的地に使うのは
   `patrol_A` / `patrol_B` / `charger_1` / `charger_2` の4つで、A3のpatrol_C/Dは存在しない
 - チャージャー到着の最終区間は Dock イベントになり、キューブ内蔵のターゲット走行で
   精密停止する(toio_fleet_adapter#3。シミュレーションにはdockサーバが無いため
   Nav2の結果だけで完了する)
 - peer costmapのフットプリントは自動で0.06(`peer_footprint_size:=auto`)
-- **既知の制約**: 2台が頂点付近で同時に入れ替わるタイミングの角接触
+- **既知の制約**: 2台が頂点付近で同時に入れ替わるタイミングでの角接触
   (旧レイアウトでのシミュレーション実測35mm前後)。チャージャー通過時に内蔵走行が
   駐機中の相手へ直進する衝突経路は toio_rmf_maps#6 でチャージャーを支線の先へ移して解消済み
   (駐機機ありの実機8回で接触0)。それでもA4での2台同時運用は物理限界に近いため、

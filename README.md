@@ -16,12 +16,12 @@ Open-RMFコア・toio用フリートアダプタ・Gazeboシミュレーショ�
 ## 対応環境と関連パッケージ
 
 対応ディストリは **ROS 2 Jazzy(Ubuntu 24.04)のみ**。Open-RMFはJazzyでは
-バイナリdebが揃っているためソースビルド不要で、toio側の各パッケージのみ
+バイナリdebが揃っているためソースビルド不要。toio側の各パッケージのみ
 `~/dev_ws/src` にソースを置いてビルドする。
 
 ![パッケージ構成と接続関係](docs/images/package_relations.svg)
 
-太い青矢印は `toio_rmf.launch.py` が起動するもの、破線は実機運用時(既定の
+太い青矢印は `toio_rmf.launch.py` が起動するものを、破線は実機運用時(既定の
 `run_sim:=false`)だけ現れる接続を表す。
 
 `toio_fleet_adapter` は走行指令をNav2の `NavigateToPose` に委譲する一方、
@@ -52,9 +52,9 @@ TF(`map` → ベースフレーム)にフォールバックする。`toio_descri
 
 ### 実機
 
-起動は2段階。**実機ブリッジを先に起動すること** — nav2 の costmap がブリッジ由来の
-TF を待つため、逆順で `initial_transform_timeout` を超えると nav2 が恒久的に
-起動失敗する(詳細と復旧方法は [docs/SETUP.md](docs/SETUP.md) の「起動(2端末)」を参照)。
+起動は2段階。**実機ブリッジを先に起動すること**。nav2 の costmap はブリッジ由来の
+TFを待つため、逆順で `initial_transform_timeout` を超えると、nav2 が
+恒久的に起動失敗する(詳細と復旧方法は [docs/SETUP.md](docs/SETUP.md) の「起動(2端末)」を参照)。
 
 ```bash
 # 端末1: 実機ブリッジ(BLE接続。キューブの電源を入れてから)
@@ -85,7 +85,7 @@ ros2 launch toio_rmf_bringup toio_rmf.launch.py mat:=a3 run_sim:=true use_sim_ti
 |---|---|---|
 | `mat` | `a3` | 使用マット(`a3` / `a4`) |
 | `use_sim_time` | `false` | シミュレーション時刻を使用(シミュレーション時は `true`) |
-| `run_sim` | `false` | toio_gazeboマルチシミュレーションも起動(実機では実機ブリッジを別途起動する) |
+| `run_sim` | `false` | toio_gazeboマルチシミュレーションも起動(実機運用では別途ブリッジを起動する) |
 | `run_nav` | `true` | toio_navigation(Nav2)も起動 |
 | `robots` | `toio1,toio2` | Nav2を立てるロボットの名前空間(カンマ区切り、toio_multi_navigationへ渡る)。Gazeboシミュレーションが出すのは固定の toio1 / toio2 |
 | `use_nav_rviz` | `false` | ロボット毎のNav2 RVizを起動 |
@@ -135,8 +135,8 @@ navグラフ頂点(toio_rmf_maps参照):
 
 **A4での2台同時運用の注意**: マットが狭く(0.30×0.20m)、2台が頂点付近で
 同時に入れ替わるタイミングでは角が接触し得る(旧レイアウトでのシミュレーション実測)。
-チャージャー通過時にドックの内蔵走行が駐機中の相手へ直進する衝突経路は
-toio_rmf_maps#6 でチャージャーを支線の先へ移して解消済み。2台での確実な非接触運用にはA3を推奨。
+チャージャー通過時、ドックの内蔵走行が駐機中の相手へ直進する衝突経路があったが、
+toio_rmf_maps#6でチャージャーを支線の先へ移して解消済み。2台での確実な非接触運用にはA3を推奨。
 peer costmapのフットプリントは `peer_footprint_size:=auto` で
 A3=0.10 / A4=0.06が自動設定される。
 

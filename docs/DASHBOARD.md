@@ -80,7 +80,7 @@ api-server 側も `USE_SIM_TIME=true` で起動する(下記「設定」参照)�
 
 <http://localhost:3000>
 
-Map タブにマットと2台のキューブ、Tasks タブから patrol タスクの投入ができる。
+Map タブにマットと2台のキューブが表示され、Tasks タブから patrol タスクを投入できる。
 
 ![rmf-webダッシュボードのRobotsタブ](images/10_dashboard_robots.png)
 *Robots タブ ── `toio1` / `toio2` がフリート `toio` として並び、位置とバッテリ残量が
@@ -115,7 +115,7 @@ Map タブにマットと2台のキューブ、Tasks タブから patrol タス�
 USE_SIM_TIME=true docker compose up -d
 ```
 
-ズームを変える場合はビルド時の値なので、変更後に再ビルドが必要:
+ズームはビルド時に埋め込まれる値のため、変更後は再ビルドが必要:
 
 ```bash
 DASHBOARD_ZOOM=12 docker compose build dashboard && docker compose up -d
@@ -129,7 +129,7 @@ DASHBOARD_ZOOM=12 docker compose build dashboard && docker compose up -d
 |---|---|---|
 | `defaultZoom` | `6`(6 px/m) | `2000`(2000 px/m)。A3マットは 0.42 × 0.30 m しかないため |
 | `defaultRobotZoom` | `20` | `4000` |
-| `allowedTasks` | patrol / delivery / compose-clean / custom_compose | **patrol / delivery**。delivery フォームの pickup/dropoff 選択肢はビルディングマップの `pickup_dispenser` / `dropoff_ingestor` vertex params(toio_rmf_maps の `patrol_*` 頂点に設定)から作られ、handler には mockワークセル名が自動で入る。sku / quantity はフォーム必須だが mockワークセルは内容を見ないので任意の値でよい |
+| `allowedTasks` | patrol / delivery / compose-clean / custom_compose | **patrol / delivery**。delivery フォームの pickup/dropoff 選択肢はビルディングマップの `pickup_dispenser` / `dropoff_ingestor` vertex params(toio_rmf_maps の `patrol_*` 頂点に設定)から作られる。handler には mockワークセル名が自動で入る。sku / quantity はフォーム必須だが mockワークセルは内容を見ないので任意の値でよい |
 | ドア・エレベータのアプリ | あり | 削除。`toio_rmf.launch.py` は door / lift supervisor を起動しない |
 
 ## 確認項目
@@ -298,8 +298,8 @@ upstream の rmf-dashboard-framework は描画サイズを数十m級の建物向
 設定を変えずに確認だけしたいときは、**レイヤボタンから `Waypoints` や `Robots` の
 チェックを外しても床面図が見える**(A4 マットで確認済み 2026-08-10)。
 
-なお toio の床面図 PNG は 60x40px で、黒いのは外周1pxの枠だけ(内側は完全な白)なので、
-覆い隠すものを消しても見えるのは細い枠線だけになる。見栄えを良くするには
+なお toio の床面図 PNG は 60x40px で、黒いのは外周1pxの枠だけ(内側は完全な白)。
+そのため、覆い隠すものを消しても見えるのは細い枠線だけになる。見栄えを良くするには
 `toio_rmf_maps` 側で床面図に中身を持たせる必要がある。
 
 **arm64 のマシンでビルドしたい**
