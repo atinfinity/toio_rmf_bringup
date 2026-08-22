@@ -77,7 +77,7 @@ A3=0.10 / A4=0.06 が自動設定される)。
 
 ![A4マットのnavグラフ](images/navgraph_a4.svg)
 
-一方通行にしているのはマットが狭いため。詳細は [README](../README.md) の
+一方通行にしているのはマットが狭いため。詳細は [docs/ARCHITECTURE.md](ARCHITECTURE.md) の
 「A4での2台同時運用の注意」を参照。チャージャーをループ上ではなく支線の先に
 置いているのは、単に通過するだけのロボットが駐機中のロボットに突っ込まないため。
 A4のチャージャー頂点には `dock_name` が設定されており、到着の最終区間は Dock
@@ -85,7 +85,7 @@ A4のチャージャー頂点には `dock_name` が設定されており、到�
 
 ## patrol タスク
 
-指定した巡回先を順にめぐる周回を、指定した回数だけ繰り返す。README「タスク投入例」のコマンドが
+指定した巡回先を順にめぐる周回を、指定した回数だけ繰り返す。[docs/LAUNCH.md](LAUNCH.md)「タスク投入例」のコマンドが
 これにあたる。
 
 ```bash
@@ -284,5 +284,6 @@ ros2 run rmf_demos_tasks cancel_task -id <task_id>
 
 ## 関連ドキュメント
 
-- [README](../README.md) — 起動方法と launch 引数
+- [README](../README.md) — 概要とクイックスタート
+- [docs/LAUNCH.md](LAUNCH.md) — 起動方法と launch 引数
 - [docs/SETUP.md](SETUP.md) — 環境構築手順と実機検証の手順

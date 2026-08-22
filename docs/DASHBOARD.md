@@ -334,6 +334,7 @@ vertex params 由来なので、選択肢に出したい waypoint は toio_rmf_m
 
 ## 関連ドキュメント
 
-- [README](../README.md) — 起動方法と launch 引数
+- [README](../README.md) — 概要とクイックスタート
+- [docs/LAUNCH.md](LAUNCH.md) — 起動方法と launch 引数
 - [docs/TASKS.md](TASKS.md) — サンプルタスクの図解
 - [docs/SETUP.md](SETUP.md) — 環境構築手順
